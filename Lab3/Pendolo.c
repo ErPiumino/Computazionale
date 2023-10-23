@@ -85,7 +85,7 @@ struct Phase Passo(struct Phase xv, double omega2, double dt, double tmax, doubl
     double x0, v0;
     x0=xv.x;
     v0=xv.v;
-	xv.v=v0 - omega2*x0*dt - b*v0;
+	xv.v=v0 - omega2*sin(x0)*dt;
 	xv.x=x0 + xv.v*dt;
 	x0=xv.x;
 	v0=xv.v;
