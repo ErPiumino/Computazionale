@@ -1,20 +1,27 @@
-//Runge-Kutta using structs
+//Runge-Kutta 4 using structs
 
 #include<stdio.h>
 #include<stdlib.h>
 #include<math.h>
 
+typedef int iterator;
+
 struct Phase{
     double x;
     double v;
 };
+struct Force{
+	double f1;
+	double f2;
+};
 struct K{
-    double k1;
-    double k2;
+	double k1;
+	double k2;
 };
 
 void Algoritmo(int argc, char **argv);
-struct Phase Passo(struct Phase xv, struct K k1, struct K k2, double omega2, double dt, double tmax);
+struct Phase Passo(struct Phase xv, struct K k1, struct K k2, struct K k3, struct K k4, struct Force F, double omega2, double dt, double tmax);
+struct Force Force(struct Phase xv, struct K k1, struct K k2, struct K k3, struct K k4, struct Force F, double omega2, double dt, double tmax);
 double Energy(struct Phase xv, double omega2);
 
 int main(int argc, char **argv){
@@ -24,8 +31,8 @@ int main(int argc, char **argv){
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void Algoritmo (int argc, char **argv){
     struct Phase xv;
-    struct K k1;
-    struct K k2;
+    struct K k1, k2, k3, k4;
+    struct Force F;
 	double omega2, tmax, dt;
 	double E0, E, Emax;
 	int k, i, n;
