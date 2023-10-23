@@ -1,4 +1,4 @@
-//Runge-Kutta 4 using structs. Actual Physics problem: caotic Pendulum
+//Runge-Kutta 4 using structs. Actual Physics problem: caotic Pendulum with study of dt variation and f0 variation
 #include<stdio.h>
 #include<stdlib.h>
 #include<math.h>
