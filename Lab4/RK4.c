@@ -1,4 +1,13 @@
 //Runge-Kutta 4 using structs. Actual Physics problem: caotic Pendulum with study of dt variation and f0 variation
+//Parametri per studio di forzante conformi a quelli su E-learning:
+//x(0)=pi/2 circa 1.570796327
+//v(0)=0
+//omega2=1
+//gamma=0.5
+//omegaext=2/3.
+//f0=0.9
+//tmax=100
+//dt=0.001
 #include<stdio.h>
 #include<stdlib.h>
 #include<math.h>
@@ -50,7 +59,7 @@ void Algoritmo (int argc, char **argv){
 	//printf("%lf\t%lf\t%lf\t%lf\t%lf", xv.x, xv.v, f0, omega2, gamma); //printf di controllo
 	if(fitchoice == 1 || fitchoice==2){}
 	else{
-		printf("\nError on the input line. Exiting...");
+		printf("\nError on the input line. Exiting...\n");
 		exit(1);
 	}
 	if(fitchoice==2){
@@ -64,7 +73,7 @@ void Algoritmo (int argc, char **argv){
 			sprintf(NomeFile, "PendoloCaoticoF0%.3lf.dat", f0); //Salvo i dati delle varie forzanti in file diversi
 		}
 		if(fitchoice==2){
-			sprintf(NomeFile, "PendoloCaoticodt%.3lf.dat", f0); //Salvo i dati delle varie forzanti in file diversi
+			sprintf(NomeFile, "PendoloCaoticodt%.3lf.dat", dt); //Salvo i dati delle varie forzanti in file diversi
 		}
   		fp = fopen(NomeFile, "w");
 		fprintf(fp, "\t %.20lf \t %.20lf \t 0.00 \t %e \n", xv.x, xv.v, E0);
@@ -76,8 +85,8 @@ void Algoritmo (int argc, char **argv){
 			if(Emax<E){
 				Emax=E; //Segno l'"Errore massimo" commesso in base al dt, altrimenti l'errore relativo sarebbe falsato
 			}
-			printf("x\tv\tf0\tOmega2\tgamma\tk1.k1\tk1.k2\n");
-			printf("%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\n", xv.x, xv.v, f0, omega2, gamma, k1.k1, k1.k2); //printf di controllo
+			//printf("x\tv\tf0\tOmega2\tgamma\tk1.k1\tk1.k2\n");
+			//printf("%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\n", xv.x, xv.v, f0, omega2, gamma, k1.k1, k1.k2); //printf di controllo
 		}
 		if(fitchoice==2){
 		fprintf(fit, "%.20lf %.20.20lf\n", dt, fabs((Emax-E0)/E0));//Salvo gli erorri relativi in base al dt su un altro file per evitare confusione
@@ -168,7 +177,7 @@ void Python(double dat[5], int fitchoice){
 	fprintf(py, "import numpy as np \n \n");
 	fprintf(py, "plt.figure(figsize=(12, 26), dpi=80)\n");
 	fprintf(py, "fig, axs = plt.subplots(2)\n"); 
-	fprintf(py, "fig.suptitle('Pendolo smorzato con Eulero-Cromer per vari $\Delta t$')\n \n");
+	fprintf(py, "fig.suptitle('Pendolo forzato con RK4 per vari $%s t$')\n \n", label);
 	fprintf(py, "# Data per x(t) e e(t)\n");
 	fprintf(py, "x1, y1, e1 = np.loadtxt('PendoloCaotico%s%.3lf.dat', usecols=(2, 0, 3), unpack=True)\n", nomefile, dat[0]); 
 	fprintf(py, "x2, y2, e2 = np.loadtxt('PendoloCaotico%s%.3lf.dat', usecols=(2, 0, 3), unpack=True)\n", nomefile, dat[1]); 
@@ -192,4 +201,16 @@ void Python(double dat[5], int fitchoice){
 	fprintf(py, "\tax.ticklabel_format(useOffset=False)\n"); 
 	fprintf(py, "axs[0].legend(loc='upper right')\n"); 
 	fprintf(py, "plt.savefig('PendoloForzato.pdf')\n");
+	fclose(py);
+	if(fitchoise==2){
+		FILE *fitpy;
+		fitpy=fopen("fit.py", "w+");
+		fprintf(py, "#Importing libraries\n"); 
+		fprintf(py, "import matplotlib.pyplot as plt\n"); 
+		fprintf(py, "import numpy as np \n \n");
+		fprintf(py, "plt.figure(figsize=(12, 26), dpi=80)\n");
+		fprintf(py, "fig, axs = plt.subplots(2)\n"); 
+		fprintf(py, "fig.suptitle('Pendolo forzato con RK4 per vari $%s t$')\n \n", label);
+		fprintf(py, "# Data per x(t) e e(t)\n");
+	}
 }
