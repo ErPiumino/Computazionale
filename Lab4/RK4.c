@@ -1,5 +1,5 @@
 //Runge-Kutta 4 using structs. Actual Physics problem: caotic Pendulum with study of dt variation and f0 variation
-//Parametri per studio di forzante conformi a quelli su E-learning:
+//Parametri per studio di forzante conformi a quelli su E-learning: 1.570796327 0 1 0.5 2/3. 0.9 100 0.001 1
 //x(0)=pi/2 circa 1.570796327
 //v(0)=0
 //omega2=1
@@ -25,7 +25,7 @@ struct K{
 
 void Algoritmo(int argc, char **argv);
 void Passo(struct Phase *xv, struct K k1, struct K k2, struct K k3, struct K k4, double omega2, double omegaext, double f0, double gamma, double dt, double tmax, int i);
-struct K Force(double x0, double v0, double dt, double omega2, double gamma, double f0, double omegaext, double t);
+struct K Force(struct K k, double x0, double v0, double dt, double omega2, double gamma, double f0, double omegaext, double t);
 double Energy(struct Phase xv, double omega2);
 void Python(double dat[5], int fitchoice);
 
@@ -37,7 +37,7 @@ int main(int argc, char **argv){
 void Algoritmo (int argc, char **argv){
     struct Phase xv;
     struct K k1, k2, k3, k4;
-	double omega2, omegaext, gamma, f0, tmax, dt, E0, E, Emax, dat[5];
+	double omega2, omegaext, gamma, f0, tmax, dt, E0, E, Emax, dat[5], x0, v0;
 	iterator k, i;
 	int n, ciclo=1, fitchoice;
 	FILE *fp;
@@ -79,14 +79,21 @@ void Algoritmo (int argc, char **argv){
 		fprintf(fp, "\t %.20lf \t %.20lf \t 0.00 \t %e \n", xv.x, xv.v, E0);
 		//Passi algoritmo
 		for(i=1; i<=n; i++){
+			x0=xv.x;
+			v0=xv.v;
+			k1 = Force(k1, x0, v0, dt, omega2, gamma, f0, omegaext, i*dt);
+			k2 = Force(k2, x0+k1.k1/2., v0+k1.k2/2., dt, omega2, gamma, f0, omegaext, i*dt+dt/2.);
+			k3 = Force(k3, x0+k2.k1/2., v0+k2.k2/2., dt, omega2, gamma, f0, omegaext, i*dt+dt/2.);
+			k4 = Force(k4, x0+k3.k1/2., v0+k3.k2/2., dt, omega2, gamma, f0, omegaext, i*dt+dt/2.);
             Passo(&xv, k1, k2, k3, k4, omega2, omegaext, f0, gamma, dt, tmax, i);
             E=Energy(xv, omega2);
             fprintf(fp,"\t %.20lf \t %.20lf \t %.20lf \t %e\n", xv.x, xv.v, (double)i*dt, E);
+            printf("\t %.20lf \t %.20lf \t %e \t %e\n", xv.x, xv.v, k1.k1, k1.k2);
 			if(Emax<E){
 				Emax=E; //Segno l'"Errore massimo" commesso in base al dt, altrimenti l'errore relativo sarebbe falsato
 			}
-			printf("x\tv\tf0\tOmega2\tgamma\tk1.k1\tk1.k2\n");
-			printf("%lf\t%lf\t%lf\t%lf\t%lf\t%.20lf\t%.20lf\n", xv.x, xv.v, f0, omega2, gamma, k1.k1, k1.k2); //printf di controllo
+			//printf("x\tv\tf0\tOmega2\tgamma\tk1.k1\tk1.k2\n");
+			//printf("%lf\t%lf\t%lf\t%lf\t%lf\t%.20lf\t%.20lf\n", xv.x, xv.v, f0, omega2, gamma, k1.k1, k1.k2); //printf di controllo
 		}
 		if(fitchoice==2){
 		fprintf(fit, "%.20lf %.20lf\n", dt, fabs((Emax-E0)/E0));//Salvo gli erorri relativi in base al dt su un altro file per evitare confusione
@@ -100,21 +107,21 @@ void Algoritmo (int argc, char **argv){
 		if(fitchoice==1){
 			if(ciclo==1){
 				dat[ciclo-1] = f0;
+				f0=1.07;
 			}
 			if(ciclo==2){
-				f0=1.07;
-				dat[ciclo-1] = f0;
-			}
-			if(ciclo==3){
 				f0=1.15;
 				dat[ciclo-1] = f0;
 			}
-			if(ciclo==4){
+			if(ciclo==3){
 				f0=1.47;
 				dat[ciclo-1] = f0;
 			}
+			if(ciclo==4){
+				f0=1.5;
+				dat[ciclo-1] = f0;
+			}
 			if(ciclo==5){
-				f0=1.50;
 				dat[ciclo-1] = f0;
 			}
 		}
@@ -131,23 +138,18 @@ double Energy(struct Phase xv, double omega2){
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void Passo(struct Phase *xv, struct K k1, struct K k2, struct K k3, struct K k4, double omega2, double omegaext, double f0, double gamma, double dt, double tmax, int i){
-    double x0, v0;
-	x0=xv->x;
-	v0=xv->v;
-	k1 = Force(x0, v0, dt, omega2, gamma, f0, omegaext, i*dt);
-	k2 = Force(x0+k1.k1/2., v0+k1.k2/2., dt, omega2, gamma, f0, omegaext, i*dt+dt/2.);
-	k3 = Force(x0+k2.k1/2., v0+k2.k2/2., dt, omega2, gamma, f0, omegaext, i*dt+dt/2.);
-	k4 = Force(x0+k3.k1/2., v0+k3.k2/2., dt, omega2, gamma, f0, omegaext, i*dt+dt/2.);
-	xv->x=x0+(k1.k1 + 2*k2.k1 + 2*k3.k1 + k4.k1)/6.;
-	xv->v=v0+(k1.k2 + 2*k2.k2 + 2*k3.k2 + k4.k2)/6.;
+void Passo (struct Phase *xv, struct K k1, struct K k2, struct K k3, struct K k4, double omega2, double omegaext, double f0, double gamma, double dt, double tmax, int i){
+    double x, v;
+	x = xv->x;
+	v = xv->v;
+	xv->x = x+(k1.k1 + 2*k2.k1 + 2*k3.k1 + k4.k1)/6.;
+	xv->v = v+(k1.k2 + 2*k2.k2 + 2*k3.k2 + k4.k2)/6.;
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-struct K Force(double x0, double v0, double dt, double omega2, double gamma, double f0, double omegaext, double t){
-	struct K k;
+struct K Force(struct K k, double x0, double v0, double dt, double omega2, double gamma, double f0, double omegaext, double t){
 	k.k1 = v0*dt;
-	k.k2 = (-omega2*sin(x0)-gamma*v0+f0*cos(omegaext*t))*dt;
+	k.k2 = (-omega2*sin(x0) - gamma*v0 + f0*cos(omegaext*t))*dt;
 	return k;
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -177,7 +179,7 @@ void Python(double dat[5], int fitchoice){
 	fprintf(py, "import numpy as np \n \n");
 	fprintf(py, "plt.figure(figsize=(12, 26), dpi=80)\n");
 	fprintf(py, "fig, axs = plt.subplots(2)\n"); 
-	fprintf(py, "fig.suptitle('Pendolo forzato con RK4 per vari $%s t$')\n \n", label);
+	fprintf(py, "fig.suptitle('Pendolo forzato con RK4 per vari $%s$')\n \n", label);
 	fprintf(py, "# Data per x(t) e e(t)\n");
 	fprintf(py, "x1, y1, e1 = np.loadtxt('PendoloCaotico%s%.3lf.dat', usecols=(2, 0, 3), unpack=True)\n", nomefile, dat[0]); 
 	fprintf(py, "x2, y2, e2 = np.loadtxt('PendoloCaotico%s%.3lf.dat', usecols=(2, 0, 3), unpack=True)\n", nomefile, dat[1]); 
