@@ -24,7 +24,7 @@ struct K{
 };
 
 void Algoritmo(int argc, char **argv);
-struct Phase Passo(struct Phase xv, struct K k1, struct K k2, struct K k3, struct K k4, double omega2, double omegaext, double f0, double gamma, double dt, double tmax, int i);
+void Passo(struct Phase *xv, struct K k1, struct K k2, struct K k3, struct K k4, double omega2, double omegaext, double f0, double gamma, double dt, double tmax, int i);
 struct K Force(double x0, double v0, double dt, double omega2, double gamma, double f0, double omegaext, double t);
 double Energy(struct Phase xv, double omega2);
 void Python(double dat[5], int fitchoice);
@@ -79,17 +79,17 @@ void Algoritmo (int argc, char **argv){
 		fprintf(fp, "\t %.20lf \t %.20lf \t 0.00 \t %e \n", xv.x, xv.v, E0);
 		//Passi algoritmo
 		for(i=1; i<=n; i++){
-            xv = Passo(xv, k1, k2, k3, k4, omega2, omegaext, f0, gamma, dt, tmax, i);
+            Passo(&xv, k1, k2, k3, k4, omega2, omegaext, f0, gamma, dt, tmax, i);
             E=Energy(xv, omega2);
             fprintf(fp,"\t %.20lf \t %.20lf \t %.20lf \t %e\n", xv.x, xv.v, (double)i*dt, E);
 			if(Emax<E){
 				Emax=E; //Segno l'"Errore massimo" commesso in base al dt, altrimenti l'errore relativo sarebbe falsato
 			}
-			//printf("x\tv\tf0\tOmega2\tgamma\tk1.k1\tk1.k2\n");
-			//printf("%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\n", xv.x, xv.v, f0, omega2, gamma, k1.k1, k1.k2); //printf di controllo
+			printf("x\tv\tf0\tOmega2\tgamma\tk1.k1\tk1.k2\n");
+			printf("%lf\t%lf\t%lf\t%lf\t%lf\t%.20lf\t%.20lf\n", xv.x, xv.v, f0, omega2, gamma, k1.k1, k1.k2); //printf di controllo
 		}
 		if(fitchoice==2){
-		fprintf(fit, "%.20lf %.20.20lf\n", dt, fabs((Emax-E0)/E0));//Salvo gli erorri relativi in base al dt su un altro file per evitare confusione
+		fprintf(fit, "%.20lf %.20lf\n", dt, fabs((Emax-E0)/E0));//Salvo gli erorri relativi in base al dt su un altro file per evitare confusione
   			fclose(fp);
 		}
 		//Inizializzo le variabili e aumento forzante
@@ -131,17 +131,16 @@ double Energy(struct Phase xv, double omega2){
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-struct Phase Passo(struct Phase xv, struct K k1, struct K k2, struct K k3, struct K k4, double omega2, double omegaext, double f0, double gamma, double dt, double tmax, int i){
+void Passo(struct Phase *xv, struct K k1, struct K k2, struct K k3, struct K k4, double omega2, double omegaext, double f0, double gamma, double dt, double tmax, int i){
     double x0, v0;
-	x0=xv.x;
-	v0=xv.v;
+	x0=xv->x;
+	v0=xv->v;
 	k1 = Force(x0, v0, dt, omega2, gamma, f0, omegaext, i*dt);
 	k2 = Force(x0+k1.k1/2., v0+k1.k2/2., dt, omega2, gamma, f0, omegaext, i*dt+dt/2.);
 	k3 = Force(x0+k2.k1/2., v0+k2.k2/2., dt, omega2, gamma, f0, omegaext, i*dt+dt/2.);
 	k4 = Force(x0+k3.k1/2., v0+k3.k2/2., dt, omega2, gamma, f0, omegaext, i*dt+dt/2.);
-	xv.x=x0+(k1.k1 + 2*k2.k1 + 2*k3.k1 + k4.k1)/6.;
-	xv.v=v0+(k1.k2 + 2*k2.k2 + 2*k3.k2 + k4.k2)/6.;
-    return xv;
+	xv->x=x0+(k1.k1 + 2*k2.k1 + 2*k3.k1 + k4.k1)/6.;
+	xv->v=v0+(k1.k2 + 2*k2.k2 + 2*k3.k2 + k4.k2)/6.;
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -155,6 +154,7 @@ struct K Force(double x0, double v0, double dt, double omega2, double gamma, dou
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//Implementation of Python file based on the data received on the input line
 void Python(double dat[5], int fitchoice){
 	FILE *py;
 	char label[10];
@@ -202,15 +202,34 @@ void Python(double dat[5], int fitchoice){
 	fprintf(py, "axs[0].legend(loc='upper right')\n"); 
 	fprintf(py, "plt.savefig('PendoloForzato.pdf')\n");
 	fclose(py);
-	if(fitchoise==2){
+	if(fitchoice==2){
 		FILE *fitpy;
 		fitpy=fopen("fit.py", "w+");
-		fprintf(py, "#Importing libraries\n"); 
-		fprintf(py, "import matplotlib.pyplot as plt\n"); 
-		fprintf(py, "import numpy as np \n \n");
-		fprintf(py, "plt.figure(figsize=(12, 26), dpi=80)\n");
-		fprintf(py, "fig, axs = plt.subplots(2)\n"); 
-		fprintf(py, "fig.suptitle('Pendolo forzato con RK4 per vari $%s t$')\n \n", label);
-		fprintf(py, "# Data per x(t) e e(t)\n");
+		fprintf(fitpy, "#Importing libraries\n"); 
+		fprintf(fitpy, "import matplotlib.pyplot as plt\n"); 
+		fprintf(fitpy, "import numpy as np \n");
+		fprintf(fitpy, "from scipy.optimize import curve_fit \n \n");
+		fprintf(fitpy, "#Codice per il fit\n");
+		fprintf(fitpy, "x,y=np.loadtxt('fit.dat',unpack=True)\n");
+		fprintf(fitpy, "log_x = np.fabs(np.log(x))\n");
+		fprintf(fitpy, "log_y = np.fabs(np.log(y))\n");
+		fprintf(fitpy, "params = np.polyfit(log_x, log_y, 1)\n");
+		fprintf(fitpy, "#params = np.polyfit(x, y, 1)\n");
+		fprintf(fitpy, "a, b = params\n");
+		fprintf(fitpy, "plt.scatter(log_x, log_y, label='Dati', marker='x', color='Darkslategrey')\n");
+		fprintf(fitpy, "plt.plot(log_x, a*log_x + b, color='skyblue', label='fit scala logaritmica', alpha=0.8)\n");
+		fprintf(fitpy, "#plt.plot(x, y, color='skyblue', label='fit lineare', alpha=0.8)\n");
+		fprintf(fitpy, "#plt.scatter(x, y, label='Dati', marker='x', color='Darkslategrey')\n");
+		fprintf(fitpy, "plt.xscale('log')\n");
+		fprintf(fitpy, "plt.yscale('log')\n");
+		fprintf(fitpy, "#m=np.fabs((np.log(y)-b)/np.log(x))\n");
+		fprintf(fitpy, "plt.xlabel('$dt$')\n");
+		fprintf(fitpy, "plt.ylabel('$e$')\n");
+		fprintf(fitpy, "#print('Il coff angolare:',m.mean())\n");
+		fprintf(fitpy, "print('Il coff angolare:',a)\n");
+		fprintf(fitpy, "#plt.text(5.5, 14, '$m=2.0184$', fontsize = 10)\n");
+		fprintf(fitpy, "plt.legend(loc='upper left')\n");
+		fprintf(fitpy, "plt.savefig('FitPendoloCaotico.pdf')\n");
+		fclose(fitpy);
 	}
 }
