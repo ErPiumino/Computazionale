@@ -138,7 +138,7 @@ void Passo (struct Phase *xv, struct K k1, struct K k2, struct K k3, struct K k4
 	k1 = Force(k1, x, v, dt, omega2, gamma, f0, omegaext, i*dt);
 	k2 = Force(k2, x+k1.k1/2., v+k1.k2/2., dt, omega2, gamma, f0, omegaext, i*dt+dt/2.);
 	k3 = Force(k3, x+k2.k1/2., v+k2.k2/2., dt, omega2, gamma, f0, omegaext, i*dt+dt/2.);
-	k4 = Force(k4, x+k3.k1/2., v+k3.k2/2., dt, omega2, gamma, f0, omegaext, i*dt+dt/2.);
+	k4 = Force(k4, x+k3.k1, v+k3.k2, dt, omega2, gamma, f0, omegaext, i*dt+dt);
 	xv->x = x+(k1.k1 + 2*k2.k1 + 2*k3.k1 + k4.k1)/6.;
 	xv->v = v+(k1.k2 + 2*k2.k2 + 2*k3.k2 + k4.k2)/6.;
 }
