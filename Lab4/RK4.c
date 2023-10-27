@@ -1,10 +1,10 @@
 //Runge-Kutta 4 using structs. Actual Physics problem: caotic Pendulum with study of dt variation and f0 variation
 //Parametri per studio di forzante conformi a quelli su E-learning: 1.5707963267948965579989817342727 0 1 0.5 2/3. 0.9 100 0.001 1
-//x(0)=pi/2 circa 1.570796327
+//x(0)=pi/2 circa 1.5707963267948965579989817342727
 //v(0)=0
 //omega2=1
 //gamma=0.5
-//omegaext=2/3.
+//omegaext=2/3. circa 0.66666666666666666666666666
 //f0=0.9
 //tmax=100
 //dt=0.001
@@ -37,9 +37,9 @@ int main(int argc, char **argv){
 void Algoritmo (int argc, char **argv){
     struct Phase xv;
     struct K k1, k2, k3, k4;
-	double omega2, omegaext, gamma, f0, tmax, dt, E0, E, Emax, dat[5], x0, v0;
+	double omega2, omegaext, gamma, f0, tmax, dt, E0, E, Emax, dat[5];
 	iterator k, i;
-	int n, ciclo=1, fitchoice;
+	int n, fitchoice;
 	FILE *fp;
 	FILE *fit;
 	if(argc !=10){
@@ -53,7 +53,7 @@ void Algoritmo (int argc, char **argv){
 	omega2 = atof(argv[3]);
 	gamma = atof(argv[4]);
 	//omegaext = atof(argv[5]);
-	omegaext = 2./3.;
+	omegaext = 2/3.;
 	f0 = atof(argv[6]);
 	tmax = atof(argv[7]);
 	dt = atof(argv[8]);
@@ -66,7 +66,7 @@ void Algoritmo (int argc, char **argv){
 	if(fitchoice==2){
 		fit=fopen("fit.dat", "w");
 	}
-	for(k=0; k<=5; k++){ //Eseguo cinque cicli perche' aumento la forzante o il dt
+	for(k=0; k<5; k++){ //Eseguo cinque cicli perche' aumento la forzante o il dt
 		n=tmax/dt;
 		E0=Energy(xv, omega2);
 		char NomeFile[50];
@@ -79,7 +79,7 @@ void Algoritmo (int argc, char **argv){
   		fp = fopen(NomeFile, "w");
 		fprintf(fp, "\t %.20lf \t %.20lf \t 0.00 \t %e \n", xv.x, xv.v, E0);
 		//Passi algoritmo
-		for(i=1; i<=n; i++){
+		for(i=1; i<n; i++){
             Passo(&xv, k1, k2, k3, k4, omega2, omegaext, f0, gamma, dt, tmax, i);
             E=Energy(xv, omega2);
             fprintf(fp,"\t %.20lf \t %.20lf \t %.20lf \t %e\n", xv.x, xv.v, (double)i*dt, E);
@@ -92,38 +92,37 @@ void Algoritmo (int argc, char **argv){
 		if(fitchoice==2){
 		fprintf(fit, "%.20lf %.20lf\n", dt, fabs((Emax-E0)/E0));//Salvo gli erorri relativi in base al dt su un altro file per evitare confusione
   			fclose(fp);
-			dat[ciclo-1] = dt;
+			dat[k] = dt;
 			dt+=0.01;
 		}
 		if(fitchoice==1){
-			if(ciclo==1){
-				dat[ciclo-1] = f0;
+			if(k==0){
+				dat[k] = f0;
 				f0=1.07;
 			}
-			if(ciclo==2){
-				dat[ciclo-1] = f0;
+			if(k==1){
+				dat[k] = f0;
 				f0=1.15;
 			}
-			if(ciclo==3){
-				dat[ciclo-1] = f0;
+			if(k==2){
+				dat[k] = f0;
 				f0=1.47;
 			}
-			if(ciclo==4){
-				dat[ciclo-1] = f0;
-				f0=1.5;
+			if(k==3){
+				dat[k] = f0;
+				f0=1.50;
 			}
-			if(ciclo==5){
-				dat[ciclo-1] = f0;
+			if(k==4){
+				dat[k] = f0;
 			}
 		}
-		ciclo+=1;
 		//xv.x = atof(argv[1]);
 		xv.x=M_PI/2;
 		xv.v = atof(argv[2]);
 		omega2 = atof(argv[3]);
 		gamma = atof(argv[4]);
 		//omegaext = atof(argv[5]);
-		omegaext = 2/3.;
+		omegaext = 2./3.;
 		tmax = atof(argv[7]);
 	}
 	Python(dat, fitchoice);
@@ -131,7 +130,7 @@ void Algoritmo (int argc, char **argv){
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 double Energy(struct Phase xv, double omega2){
-    return (xv.v*xv.v + 2*omega2*(1.-cos(xv.x)));
+    return (xv.v*xv.v + 2.*omega2*(1.-cos(xv.x)));
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -139,12 +138,12 @@ void Passo (struct Phase *xv, struct K k1, struct K k2, struct K k3, struct K k4
     double x, v;
 	x = xv->x;
 	v = xv->v;
-	k1 = Force(k1, x, v, dt, omega2, gamma, f0, omegaext, i*dt);
-	k2 = Force(k2, x+k1.k1/2., v+k1.k2/2., dt, omega2, gamma, f0, omegaext, i*dt+dt/2.);
-	k3 = Force(k3, x+k2.k1/2., v+k2.k2/2., dt, omega2, gamma, f0, omegaext, i*dt+dt/2.);
-	k4 = Force(k4, x+k3.k1, v+k3.k2, dt, omega2, gamma, f0, omegaext, i*dt+dt);
-	xv->x = x+(k1.k1 + 2*k2.k1 + 2*k3.k1 + k4.k1)/6.;
-	xv->v = v+(k1.k2 + 2*k2.k2 + 2*k3.k2 + k4.k2)/6.;
+	k1 = Force(k1, x, v, dt, omega2, gamma, f0, omegaext, (double)(i-1)*dt);
+	k2 = Force(k2, x+k1.k1/2., v+k1.k2/2., dt, omega2, gamma, f0, omegaext, (double)(i-1)*dt+dt/2.);
+	k3 = Force(k3, x+k2.k1/2., v+k2.k2/2., dt, omega2, gamma, f0, omegaext, (double)(i-1)*dt+dt/2.);
+	k4 = Force(k4, x+k3.k1, v+k3.k2, dt, omega2, gamma, f0, omegaext, (double)(i-1)*dt+dt);
+	xv->x = x+(k1.k1 + 2.*k2.k1 + 2.*k3.k1 + k4.k1)/6.;
+	xv->v = v+(k1.k2 + 2.*k2.k2 + 2.*k3.k2 + k4.k2)/6.;
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -178,31 +177,34 @@ void Python(double dat[5], int fitchoice){
 	fprintf(py, "# Importing libraries\n"); 
 	fprintf(py, "import matplotlib.pyplot as plt\n"); 
 	fprintf(py, "import numpy as np \n \n");
-	fprintf(py, "plt.figure(figsize=(25, 50), dpi=80)\n");
+	fprintf(py, "#plt.figure(figsize=(25, 50), dpi=80)\n");
 	fprintf(py, "fig, axs = plt.subplots(2)\n"); 
 	fprintf(py, "fig.suptitle('Pendolo forzato con RK4 per vari $%s$')\n \n", label);
 	fprintf(py, "# Data per x(t) e e(t)\n");
-	fprintf(py, "x1, y1, e1 = np.loadtxt('PendoloCaotico%s%.3lf.dat', usecols=(2, 0, 3), unpack=True)\n", nomefile, dat[0]); 
-	fprintf(py, "x2, y2, e2 = np.loadtxt('PendoloCaotico%s%.3lf.dat', usecols=(2, 0, 3), unpack=True)\n", nomefile, dat[1]); 
-	fprintf(py, "x3, y3, e3 = np.loadtxt('PendoloCaotico%s%.3lf.dat', usecols=(2, 0, 3), unpack=True)\n", nomefile, dat[2]); 
-	fprintf(py, "x4, y4, e4 = np.loadtxt('PendoloCaotico%s%.3lf.dat', usecols=(2, 0, 3), unpack=True)\n", nomefile, dat[3]); 
-	fprintf(py, "x5, y5, e5 = np.loadtxt('PendoloCaotico%s%.3lf.dat', usecols=(2, 0, 3), unpack=True)\n", nomefile, dat[4]); 
+	fprintf(py, "x1, y1, v1 = np.loadtxt('PendoloCaotico%s%.3lf.dat', usecols=(2, 0, 1), unpack=True)\n", nomefile, dat[0]); 
+	fprintf(py, "x2, y2, v2 = np.loadtxt('PendoloCaotico%s%.3lf.dat', usecols=(2, 0, 1), unpack=True)\n", nomefile, dat[1]); 
+	fprintf(py, "x3, y3, v3 = np.loadtxt('PendoloCaotico%s%.3lf.dat', usecols=(2, 0, 1), unpack=True)\n", nomefile, dat[2]); 
+	fprintf(py, "x4, y4, v4 = np.loadtxt('PendoloCaotico%s%.3lf.dat', usecols=(2, 0, 1), unpack=True)\n", nomefile, dat[3]); 
+	fprintf(py, "x5, y5, v5 = np.loadtxt('PendoloCaotico%s%.3lf.dat', usecols=(2, 0, 1), unpack=True)\n", nomefile, dat[4]); 
 	fprintf(py, "axs[0].plot(x1, y1, color='darkslategrey', label='$%s = %.3lf$', alpha=0.5, linewidth=0.5)\n", nomefile, dat[0]); 
 	fprintf(py, "axs[0].plot(x2, y2, color='blue', label='$%s = %.3lf$', alpha=0.5, linewidth=0.5)\n", nomefile, dat[1]); 
 	fprintf(py, "axs[0].plot(x3, y3, color='green', label='$%s = %.3lf$', alpha=0.5, linewidth=0.5)\n", nomefile, dat[2]); 
 	fprintf(py, "axs[0].plot(x4, y4, color='skyblue', label='$%s = %.3lf$', alpha=0.5, linewidth=0.5)\n", nomefile, dat[3]); 
 	fprintf(py, "axs[0].plot(x5, y5, color='red', label='$%s = %.3lf$', alpha=0.5, linewidth=0.5)\n", nomefile, dat[4]); 
 	fprintf(py, "axs[0].set(xlabel='$t$', ylabel='$x(t)$')\n"); 
-	fprintf(py, "axs[1].plot(e1, y1, color='darkslategrey', label='$%s = %.3lf$', alpha=0.5, linewidth=0.5)\n", nomefile, dat[0]); 
-	fprintf(py, "axs[1].plot(e2, y2, color='blue', label='$%s = %.3lf$', alpha=0.5, linewidth=0.5)\n", nomefile, dat[1]); 
-	fprintf(py, "axs[1].plot(e3, y3, color='green', label='$%s = %.3lf$', alpha=0.5, linewidth=0.5)\n", nomefile, dat[2]); 
-	fprintf(py, "axs[1].plot(e4, y4, color='skyblue', label='$%s = %.3lf$', alpha=0.5, linewidth=0.5)\n", nomefile, dat[3]); 
-	fprintf(py, "axs[1].plot(e5, y5, color='red', label='$%s = %.3lf$', alpha=0.5, linewidth=0.5)\n", nomefile, dat[4]); 
-	fprintf(py, "axs[1].set(xlabel='$t$', ylabel='$E(t)$')\n"); 
-	fprintf(py, "for ax in axs.flat:\n"); 
-	fprintf(py, "\tax.legend()\n");
-	fprintf(py, "\tax.ticklabel_format(useOffset=False)\n"); 
-	fprintf(py, "\tax.legend(loc='upper left')\n"); 
+	fprintf(py, "axs[1].plot(y1, v1, color='darkslategrey', alpha=0.5, linewidth=0.5)\n"); 
+	fprintf(py, "axs[1].plot(y2, v2, color='blue', alpha=0.5, linewidth=0.5)\n"); 
+	fprintf(py, "axs[1].plot(y3, v3, color='green', alpha=0.5, linewidth=0.5)\n"); 
+	fprintf(py, "axs[1].plot(y4, v4, color='skyblue', alpha=0.5, linewidth=0.5)\n"); 
+	fprintf(py, "axs[1].plot(y5, v5, color='red', alpha=0.5, linewidth=0.5)\n"); 
+	fprintf(py, "axs[1].set(xlabel='$x(t)$', ylabel='$v(t)$')\n"); 
+	fprintf(py, "handles, labels = axs[-1].get_legend_handles_labels()\n"); 
+	fprintf(py, "for ax in axs[:-1]:\n"); 
+	fprintf(py, "\th, l=ax.get_legend_handles_labels()\n"); 
+	fprintf(py, "\thandles += h\n"); 
+	fprintf(py, "\tlabels += l\n"); 
+	fprintf(py, "fig.legend(handles, labels, loc='upper right', bbox_to_anchor=(1, 0.75))\n"); 
+	fprintf(py, "fig.subplots_adjust(right=0.7)\n");  
 	fprintf(py, "plt.savefig('PendoloForzato.pdf')\n");
 	fclose(py);
 	if(fitchoice==2){
@@ -220,8 +222,8 @@ void Python(double dat[5], int fitchoice){
 		fprintf(fitpy, "#params = np.polyfit(x, y, 5)\n");
 		fprintf(fitpy, "a = params[0]\n");
 		fprintf(fitpy, "b = params[1]\n");
-		fprintf(fitpy, "plt.loglog(x, y, label='Dati', marker='x', color='Darkslategrey')\n");
-		fprintf(fitpy, "plt.loglog(x, 10**b * x**a, color='skyblue', label=f'm={a:.2f}', alpha=0.8)\n");
+		fprintf(fitpy, "plt.loglog(x, y, label=f'Dati, m={a:.2f}', marker='x', color='Darkslategrey')\n");
+		fprintf(fitpy, "#plt.loglog(x, 10**b * x**a, color='skyblue', label=f'm={a:.2f}', alpha=0.8)\n");
 		fprintf(fitpy, "#plt.plot(x,a*x**5 + b*x**4 + c*x**3 + d*x**2 + e*x + f, color='skyblue', label='fit lineare', alpha=0.8)\n");
 		fprintf(fitpy, "#plt.scatter(x, y, label='Dati', marker='x', color='Darkslategrey')\n");
 		fprintf(fitpy, "#m=np.fabs((y-b*x**4-c*x**3-d*x**2-e*x-f)/(x**5))\n");

@@ -11,8 +11,8 @@ params = np.polyfit(log_x, log_y, 1)
 #params = np.polyfit(x, y, 5)
 a = params[0]
 b = params[1]
-plt.loglog(x, y, label='Dati', marker='x', color='Darkslategrey')
-plt.loglog(x, 10**b * x**a, color='skyblue', label=f'm={a:.2f}', alpha=0.8)
+plt.loglog(x, y, label=f'Dati, m={a:.2f}', marker='x', color='Darkslategrey')
+#plt.loglog(x, 10**b * x**a, color='skyblue', label=f'm={a:.2f}', alpha=0.8)
 #plt.plot(x,a*x**5 + b*x**4 + c*x**3 + d*x**2 + e*x + f, color='skyblue', label='fit lineare', alpha=0.8)
 #plt.scatter(x, y, label='Dati', marker='x', color='Darkslategrey')
 #m=np.fabs((y-b*x**4-c*x**3-d*x**2-e*x-f)/(x**5))
