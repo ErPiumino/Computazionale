@@ -47,11 +47,13 @@ void Algoritmo (int argc, char **argv){
 		exit(1);
 	}
 	//Lettura variabili e apertura file
-	xv.x = atof(argv[1]);//atof legge un float, atoi per gli int
+	//xv.x = atof(argv[1]);//atof legge un float, atoi per gli int
+	xv.x=M_PI/2.;
 	xv.v = atof(argv[2]);
 	omega2 = atof(argv[3]);
 	gamma = atof(argv[4]);
-	omegaext = atof(argv[5]);
+	//omegaext = atof(argv[5]);
+	omegaext = 2./3.;
 	f0 = atof(argv[6]);
 	tmax = atof(argv[7]);
 	dt = atof(argv[8]);
@@ -62,8 +64,7 @@ void Algoritmo (int argc, char **argv){
 		exit(1);
 	}
 	if(fitchoice==2){
-		
-		fit=fopen("fit", "w");
+		fit=fopen("fit.dat", "w");
 	}
 	for(k=0; k<=5; k++){ //Eseguo cinque cicli perche' aumento la forzante o il dt
 		n=tmax/dt;
@@ -91,11 +92,8 @@ void Algoritmo (int argc, char **argv){
 		if(fitchoice==2){
 		fprintf(fit, "%.20lf %.20lf\n", dt, fabs((Emax-E0)/E0));//Salvo gli erorri relativi in base al dt su un altro file per evitare confusione
   			fclose(fp);
-		}
-		//Inizializzo le variabili e aumento forzante
-		if(fitchoice==2){
-			dt+=0.001;
 			dat[ciclo-1] = dt;
+			dt+=0.01;
 		}
 		if(fitchoice==1){
 			if(ciclo==1){
@@ -119,15 +117,21 @@ void Algoritmo (int argc, char **argv){
 			}
 		}
 		ciclo+=1;
-		xv.x = atof(argv[1]);
+		//xv.x = atof(argv[1]);
+		xv.x=M_PI/2;
 		xv.v = atof(argv[2]);
+		omega2 = atof(argv[3]);
+		gamma = atof(argv[4]);
+		//omegaext = atof(argv[5]);
+		omegaext = 2/3.;
+		tmax = atof(argv[7]);
 	}
 	Python(dat, fitchoice);
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 double Energy(struct Phase xv, double omega2){
-    return (xv.v*xv.v + omega2*(1.-cos(xv.x)));
+    return (xv.v*xv.v + 2*omega2*(1.-cos(xv.x)));
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -174,7 +178,7 @@ void Python(double dat[5], int fitchoice){
 	fprintf(py, "# Importing libraries\n"); 
 	fprintf(py, "import matplotlib.pyplot as plt\n"); 
 	fprintf(py, "import numpy as np \n \n");
-	fprintf(py, "plt.figure(figsize=(12, 26), dpi=80)\n");
+	fprintf(py, "plt.figure(figsize=(25, 50), dpi=80)\n");
 	fprintf(py, "fig, axs = plt.subplots(2)\n"); 
 	fprintf(py, "fig.suptitle('Pendolo forzato con RK4 per vari $%s$')\n \n", label);
 	fprintf(py, "# Data per x(t) e e(t)\n");
@@ -210,23 +214,21 @@ void Python(double dat[5], int fitchoice){
 		fprintf(fitpy, "from scipy.optimize import curve_fit \n \n");
 		fprintf(fitpy, "#Codice per il fit\n");
 		fprintf(fitpy, "x,y=np.loadtxt('fit.dat',unpack=True)\n");
-		fprintf(fitpy, "log_x = np.fabs(np.log(x))\n");
-		fprintf(fitpy, "log_y = np.fabs(np.log(y))\n");
+		fprintf(fitpy, "log_x = np.fabs(np.log10(x))\n");
+		fprintf(fitpy, "log_y = np.fabs(np.log10(y))\n");
 		fprintf(fitpy, "params = np.polyfit(log_x, log_y, 1)\n");
-		fprintf(fitpy, "#params = np.polyfit(x, y, 1)\n");
-		fprintf(fitpy, "a, b = params\n");
-		fprintf(fitpy, "plt.scatter(log_x, log_y, label='Dati', marker='x', color='Darkslategrey')\n");
-		fprintf(fitpy, "plt.plot(log_x, a*log_x + b, color='skyblue', label='fit scala logaritmica', alpha=0.8)\n");
-		fprintf(fitpy, "#plt.plot(x, y, color='skyblue', label='fit lineare', alpha=0.8)\n");
+		fprintf(fitpy, "#params = np.polyfit(x, y, 5)\n");
+		fprintf(fitpy, "a = params[0]\n");
+		fprintf(fitpy, "b = params[1]\n");
+		fprintf(fitpy, "plt.loglog(x, y, label='Dati', marker='x', color='Darkslategrey')\n");
+		fprintf(fitpy, "plt.loglog(x, 10**b * x**a, color='skyblue', label=f'm={a:.2f}', alpha=0.8)\n");
+		fprintf(fitpy, "#plt.plot(x,a*x**5 + b*x**4 + c*x**3 + d*x**2 + e*x + f, color='skyblue', label='fit lineare', alpha=0.8)\n");
 		fprintf(fitpy, "#plt.scatter(x, y, label='Dati', marker='x', color='Darkslategrey')\n");
-		fprintf(fitpy, "plt.xscale('log')\n");
-		fprintf(fitpy, "plt.yscale('log')\n");
-		fprintf(fitpy, "#m=np.fabs((np.log(y)-b)/np.log(x))\n");
+		fprintf(fitpy, "#m=np.fabs((y-b*x**4-c*x**3-d*x**2-e*x-f)/(x**5))\n");
 		fprintf(fitpy, "plt.xlabel('$dt$')\n");
 		fprintf(fitpy, "plt.ylabel('$e$')\n");
 		fprintf(fitpy, "#print('Il coff angolare:',m.mean())\n");
 		fprintf(fitpy, "print('Il coff angolare:',a)\n");
-		fprintf(fitpy, "#plt.text(5.5, 14, '$m=2.0184$', fontsize = 10)\n");
 		fprintf(fitpy, "plt.legend(loc='upper left')\n");
 		fprintf(fitpy, "plt.savefig('FitPendoloCaotico.pdf')\n");
 		fclose(fitpy);
