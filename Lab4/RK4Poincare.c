@@ -1,5 +1,5 @@
 //Runge-Kutta 4 using structs. Actual Physics problem: caotic Pendulum with study of dt variation and f0 variation
-//Parametri per studio di forzante conformi a quelli su E-learning: 1.5707963267948965579989817342727 0 1 0.5 2/3. 0.9 100 0.001 1
+//Parametri per studio di forzante conformi a quelli su E-learning: 1.5707963267948965579989817342727 0 1 0.5 0.6666 0.9 100 0.001 1
 //x(0)=pi/2 circa 1.5707963267948965579989817342727
 //v(0)=0
 //omega2=1
@@ -42,6 +42,7 @@ void Algoritmo (int argc, char **argv){
 	int n;
 	FILE *fp;
 	FILE *fit;
+	FILE *punti;
 	if(argc !=8){
 		printf("\nInput must be: theta0(deg) dtheta0/dt(rad/s) omega2(rad/s^2) gamma omegaext f0 tmax(s) \n");
 		exit(1);
@@ -59,9 +60,9 @@ void Algoritmo (int argc, char **argv){
 	dt = (2.*M_PI/omegaext)/1000;
 	for(k=0; k<5; k++){ //Eseguo cinque cicli perche' aumento la forzante o il dt
 		n=tmax/dt;
-		double punti[n][2];
 		E0=Energy(xv, omega2);
 		char NomeFile[50];
+		char NomeFilePunti[50];
 		sprintf(NomeFile, "PendoloPoincareF0%.3lf.dat", f0); //Salvo i dati delle varie forzanti in file diversi
   		fp = fopen(NomeFile, "w");
 		fprintf(fp, "\t %.20lf \t %.20lf \t 0.00 \t %e \n", xv.x, xv.v, E0);
@@ -71,9 +72,11 @@ void Algoritmo (int argc, char **argv){
             E=Energy(xv, omega2);
 			if(i*dt >= 5.*2.*M_PI/omegaext){
             	fprintf(fp,"\t %.20lf \t %.20lf \t %.20lf \t %e\n", xv.x, xv.v, (double)i*dt, E);
-				if(((int)(i*dt))%((int)(2.*M_PI/omegaext))==0){
-				punti[i-1][0]=xv.x;
-				punti[i-1][1]=xv.v;
+				//Salvamento dati dei punti dove insiste la forzante (NON FUNZIONA)
+				if(((int)(2.*M_PI/omegaext))%((int)(i*dt))==0){
+					sprintf(NomeFilePunti, "PuntiPoincarreF0%.3lf.dat", f0); 
+					punti = fopen(NomeFilePunti, "w+");
+					fprintf(punti, "%.10lf %.10lf", xv.x, xv.v);
 			}
 			}
 			if(Emax<E){
@@ -172,15 +175,19 @@ void Python(double dat[5]){
 	fprintf(py, "x3, v3 = np.loadtxt('PendoloPoincare%s%.3lf.dat', usecols=(0, 1), unpack=True)\n", nomefile, dat[2]); 
 	fprintf(py, "x4, v4 = np.loadtxt('PendoloPoincare%s%.3lf.dat', usecols=(0, 1), unpack=True)\n", nomefile, dat[3]); 
 	fprintf(py, "x5, v5 = np.loadtxt('PendoloPoincare%s%.3lf.dat', usecols=(0, 1), unpack=True)\n", nomefile, dat[4]); 
-	fprintf(py, "axs[0,0].scatter(x1, v1, color='darkslategrey', label='$%s = %.3lf$', marker='.', s=0.001)\n", nomefile, dat[0]); 
+	fprintf(py, "xp1, vp1 = np.loadtxt('PuntiPoincarre%s%.3lf.dat', usecols=(0, 1), unpack=True)\n", nomefile, dat[0]); 
+	fprintf(py, "xp2, vp2 = np.loadtxt('PuntiPoincarre%s%.3lf.dat', usecols=(0, 1), unpack=True)\n", nomefile, dat[1]); 
+	fprintf(py, "axs[0,0].scatter(x1, v1, color='blue', label='$%s = %.3lf$', marker='.', s=0.001)\n", nomefile, dat[0]); 
+	fprintf(py, "axs[0,0].scatter(xp1, vp1, color='red', label='$%s = %.3lf$', marker='.', s=100)\n", nomefile, dat[0]); 
 	fprintf(py, "axs[0,0].legend(loc='upper left', fontsize=8)\n"); 
 	fprintf(py, "axs[0,1].scatter(x2, v2, color='blue', label='$%s = %.2lf$', s=0.001)\n", nomefile, dat[1]); 
+	fprintf(py, "axs[0,1].scatter(xp2, vp2, color='red', label='$%s = %.3lf$', marker='.', s=100)\n", nomefile, dat[0]); 
 	fprintf(py, "axs[0,1].legend(loc='upper left', fontsize=8)\n");
-	fprintf(py, "axs[1,0].scatter(x3, v3, color='green', label='$%s = %.2lf$', s=0.001)\n", nomefile, dat[2]); 
+	fprintf(py, "axs[1,0].scatter(x3, v3, color='blue', label='$%s = %.2lf$', s=0.001)\n", nomefile, dat[2]); 
 	fprintf(py, "axs[1,0].legend(loc='upper left', fontsize=8)\n");
-	fprintf(py, "axs[1,1].scatter(x4, v4, color='skyblue', label='$%s = %.2lf$', s=0.001)\n", nomefile, dat[3]); 
+	fprintf(py, "axs[1,1].scatter(x4, v4, color='blue', label='$%s = %.2lf$', s=0.001)\n", nomefile, dat[3]); 
 	fprintf(py, "axs[1,1].legend(loc='upper left', fontsize=8)\n");
-	fprintf(py, "axs[2,0].scatter(x5, v5, color='red', label='$%s = %.2lf$', s=0.001)\n", nomefile, dat[4]);  
+	fprintf(py, "axs[2,0].scatter(x5, v5, color='blue', label='$%s = %.2lf$', s=0.001)\n", nomefile, dat[4]);  
 	fprintf(py, "axs[2,0].legend(loc='upper left', fontsize=8)\n");
 	fprintf(py, "axs[2,1].set_visible(False)\n");  
 	fprintf(py, "for ax in axs.flat:\n");
