@@ -1,10 +1,11 @@
 //Runge-Kutta 4 using structs. Actual Physics problem: caotic Pendulum with study of dt variation and f0 variation
-//Parametri per studio di forzante conformi a quelli su E-learning: 1.5707963267948965579989817342727 0 1 0.5 2/3. 0.9 100 0.001 1
+//Parametri per studio di forzante conformi a quelli su E-learning: 1.5707963267948965579989817342727 0 1 0.5 0.66666666666667 0.9 100 0.001 1
+//Parametri per studio di dt per fit: 1.5707963267948965579989817342727 0 1 0 0 0 100 0.01 2
 //x(0)=pi/2 circa 1.5707963267948965579989817342727
 //v(0)=0
 //omega2=1
 //gamma=0.5
-//omegaext=2/3. circa 0.66666666666666666666666666
+//omegaext=2/3. 
 //f0=0.9
 //tmax=100
 //dt=0.001
@@ -52,8 +53,8 @@ void Algoritmo (int argc, char **argv){
 	xv.v = atof(argv[2]);
 	omega2 = atof(argv[3]);
 	gamma = atof(argv[4]);
-	//omegaext = atof(argv[5]);
-	omegaext = 2/3.;
+	omegaext = atof(argv[5]);
+	//omegaext = 2/3.;
 	f0 = atof(argv[6]);
 	tmax = atof(argv[7]);
 	dt = atof(argv[8]);
@@ -64,17 +65,17 @@ void Algoritmo (int argc, char **argv){
 		exit(1);
 	}
 	if(fitchoice==2){
-		fit=fopen("fit.dat", "w");
+		fit=fopen("/workspaces/Computazionale/Lab4/File/fit.dat", "w");
 	}
 	for(k=0; k<5; k++){ //Eseguo cinque cicli perche' aumento la forzante o il dt
 		n=tmax/dt;
 		E0=Energy(xv, omega2);
-		char NomeFile[50];
+		char NomeFile[65];
 		if(fitchoice==1){
-			sprintf(NomeFile, "PendoloCaoticoF0%.3lf.dat", f0); //Salvo i dati delle varie forzanti in file diversi
+			sprintf(NomeFile, "/workspaces/Computazionale/Lab4/File/PendoloCaoticoF0%.3lf.dat", f0); //Salvo i dati delle varie forzanti in file diversi
 		}
 		if(fitchoice==2){
-			sprintf(NomeFile, "PendoloCaoticodt%.3lf.dat", dt); //Salvo i dati delle varie forzanti in file diversi
+			sprintf(NomeFile, "/workspaces/Computazionale/Lab4/File/PendoloCaoticodt%.3lf.dat", dt); //Salvo i dati dei vari dt in file diversi
 		}
   		fp = fopen(NomeFile, "w");
 		fprintf(fp, "\t %.20lf \t %.20lf \t 0.00 \t %e \n", xv.x, xv.v, E0);
@@ -86,8 +87,6 @@ void Algoritmo (int argc, char **argv){
 			if(Emax<E){
 				Emax=E; //Segno l'"Errore massimo" commesso in base al dt, altrimenti l'errore relativo sarebbe falsato
 			}
-			//printf("x\tv\tf0\tOmega2\tgamma\tk1.k1\tk1.k2\n");
-			//printf("%lf\t%lf\t%lf\t%lf\t%lf\t%.20lf\t%.20lf\n", xv.x, xv.v, f0, omega2, gamma, k1.k1, k1.k2); //printf di controllo
 		}
 		if(fitchoice==2){
 		fprintf(fit, "%.20lf %.20lf\n", dt, fabs((Emax-E0)/E0));//Salvo gli erorri relativi in base al dt su un altro file per evitare confusione
@@ -121,8 +120,8 @@ void Algoritmo (int argc, char **argv){
 		xv.v = atof(argv[2]);
 		omega2 = atof(argv[3]);
 		gamma = atof(argv[4]);
-		//omegaext = atof(argv[5]);
-		omegaext = 2./3.;
+		omegaext = atof(argv[5]);
+		//omegaext = 2./3.;
 		tmax = atof(argv[7]);
 	}
 	Python(dat, fitchoice);
@@ -181,11 +180,11 @@ void Python(double dat[5], int fitchoice){
 	fprintf(py, "fig, axs = plt.subplots(2)\n"); 
 	fprintf(py, "fig.suptitle('Pendolo forzato con RK4 per vari $%s$')\n \n", label);
 	fprintf(py, "# Data per x(t) e e(t)\n");
-	fprintf(py, "x1, y1, v1 = np.loadtxt('PendoloCaotico%s%.3lf.dat', usecols=(2, 0, 1), unpack=True)\n", nomefile, dat[0]); 
-	fprintf(py, "x2, y2, v2 = np.loadtxt('PendoloCaotico%s%.3lf.dat', usecols=(2, 0, 1), unpack=True)\n", nomefile, dat[1]); 
-	fprintf(py, "x3, y3, v3 = np.loadtxt('PendoloCaotico%s%.3lf.dat', usecols=(2, 0, 1), unpack=True)\n", nomefile, dat[2]); 
-	fprintf(py, "x4, y4, v4 = np.loadtxt('PendoloCaotico%s%.3lf.dat', usecols=(2, 0, 1), unpack=True)\n", nomefile, dat[3]); 
-	fprintf(py, "x5, y5, v5 = np.loadtxt('PendoloCaotico%s%.3lf.dat', usecols=(2, 0, 1), unpack=True)\n", nomefile, dat[4]); 
+	fprintf(py, "x1, y1, v1 = np.loadtxt('/workspaces/Computazionale/Lab4/File/PendoloCaotico%s%.3lf.dat', usecols=(2, 0, 1), unpack=True)\n", nomefile, dat[0]); 
+	fprintf(py, "x2, y2, v2 = np.loadtxt('/workspaces/Computazionale/Lab4/File/PendoloCaotico%s%.3lf.dat', usecols=(2, 0, 1), unpack=True)\n", nomefile, dat[1]); 
+	fprintf(py, "x3, y3, v3 = np.loadtxt('/workspaces/Computazionale/Lab4/File/PendoloCaotico%s%.3lf.dat', usecols=(2, 0, 1), unpack=True)\n", nomefile, dat[2]); 
+	fprintf(py, "x4, y4, v4 = np.loadtxt('/workspaces/Computazionale/Lab4/File/PendoloCaotico%s%.3lf.dat', usecols=(2, 0, 1), unpack=True)\n", nomefile, dat[3]); 
+	fprintf(py, "x5, y5, v5 = np.loadtxt('/workspaces/Computazionale/Lab4/File/PendoloCaotico%s%.3lf.dat', usecols=(2, 0, 1), unpack=True)\n", nomefile, dat[4]); 
 	fprintf(py, "axs[0].plot(x1, y1, color='darkslategrey', label='$%s = %.3lf$', alpha=0.5, linewidth=0.5)\n", nomefile, dat[0]); 
 	fprintf(py, "axs[0].plot(x2, y2, color='blue', label='$%s = %.3lf$', alpha=0.5, linewidth=0.5)\n", nomefile, dat[1]); 
 	fprintf(py, "axs[0].plot(x3, y3, color='green', label='$%s = %.3lf$', alpha=0.5, linewidth=0.5)\n", nomefile, dat[2]); 
@@ -205,7 +204,7 @@ void Python(double dat[5], int fitchoice){
 	fprintf(py, "\tlabels += l\n"); 
 	fprintf(py, "fig.legend(handles, labels, loc='upper right', bbox_to_anchor=(1, 0.75))\n"); 
 	fprintf(py, "fig.subplots_adjust(right=0.7)\n");  
-	fprintf(py, "plt.savefig('PendoloForzato.pdf')\n");
+	fprintf(py, "plt.savefig('/workspaces/Computazionale/Lab4/Grafici/PendoloForzato.pdf')\n");
 	fclose(py);
 	if(fitchoice==2){
 		FILE *fitpy;
@@ -215,7 +214,7 @@ void Python(double dat[5], int fitchoice){
 		fprintf(fitpy, "import numpy as np \n");
 		fprintf(fitpy, "from scipy.optimize import curve_fit \n \n");
 		fprintf(fitpy, "#Codice per il fit\n");
-		fprintf(fitpy, "x,y=np.loadtxt('fit.dat',unpack=True)\n");
+		fprintf(fitpy, "x,y=np.loadtxt('/workspaces/Computazionale/Lab4/File/fit.dat',unpack=True)\n");
 		fprintf(fitpy, "log_x = np.fabs(np.log10(x))\n");
 		fprintf(fitpy, "log_y = np.fabs(np.log10(y))\n");
 		fprintf(fitpy, "params = np.polyfit(log_x, log_y, 1)\n");
@@ -232,7 +231,7 @@ void Python(double dat[5], int fitchoice){
 		fprintf(fitpy, "#print('Il coff angolare:',m.mean())\n");
 		fprintf(fitpy, "print('Il coff angolare:',a)\n");
 		fprintf(fitpy, "plt.legend(loc='upper left')\n");
-		fprintf(fitpy, "plt.savefig('FitPendoloCaotico.pdf')\n");
+		fprintf(fitpy, "plt.savefig('/workspaces/Computazionale/Lab4/Grafici/FitPendoloCaotico.pdf')\n");
 		fclose(fitpy);
 	}
 }

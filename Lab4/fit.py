@@ -4,7 +4,7 @@ import numpy as np
 from scipy.optimize import curve_fit 
  
 #Codice per il fit
-x,y=np.loadtxt('fit.dat',unpack=True)
+x,y=np.loadtxt('/workspaces/Computazionale/Lab4/File/fit.dat',unpack=True)
 log_x = np.fabs(np.log10(x))
 log_y = np.fabs(np.log10(y))
 params = np.polyfit(log_x, log_y, 1)
@@ -21,4 +21,4 @@ plt.ylabel('$e$')
 #print('Il coff angolare:',m.mean())
 print('Il coff angolare:',a)
 plt.legend(loc='upper left')
-plt.savefig('FitPendoloCaotico.pdf')
+plt.savefig('/workspaces/Computazionale/Lab4/Grafici/FitPendoloCaotico.pdf')
