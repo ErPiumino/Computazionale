@@ -221,7 +221,6 @@ void Python(double dat[5]){
 	fprintf(py2, "import matplotlib.pyplot as plt\n");
 	fprintf(py2, "import numpy as np \n \n");
 	fprintf(py2, "plt.title('Sezione di Poincarre per varie F0')\n");
-	fprintf(py2, "plt.grid()\n");
 	fprintf(py2, "plt.xlabel('$\\\\theta$')\n");
 	fprintf(py2, "plt.ylabel('$d\\\\theta/dt$')\n");
 	fprintf(py2, "xp1, vp1 = np.loadtxt('/workspaces/Computazionale/Lab4/File/PuntiPoincarre%s%.3lf.dat', usecols=(0, 1), unpack=True)\n", nomefile, dat[0]);
