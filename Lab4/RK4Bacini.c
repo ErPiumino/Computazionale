@@ -1,5 +1,5 @@
 //Runge-Kutta 4 using structs. Actual Physics problem: caotic Pendulum with study of dt variation and f0 variation
-//Parametri per studio di bacini conformi a quelli su E-learning: -3.1415926535 -3.1415926535 1 0.5 0.66666667 0.9 100 0.01
+//Parametri per studio di bacini conformi a quelli su E-learning: -3.1415926535 -3.1415926535 1 0.5 0.66666667 1.07 100 0.01
 #include<stdio.h>
 #include<stdlib.h>
 #include<math.h>
@@ -18,7 +18,7 @@ struct K{
 void Algoritmo(int argc, char **argv);
 void Passo(struct Phase *xv, struct K k1, struct K k2, struct K k3, struct K k4, double omega2, double omegaext, double f0, double gamma, double dt, double tmax, int jj);
 struct K Force(struct K k, double x0, double v0, double dt, double omega2, double gamma, double f0, double omegaext, double t);
-void Python(double dat[5]);
+void Python(double dat[4], double temp[4]);
 
 int main(int argc, char **argv){
 	Algoritmo(argc, argv); 
@@ -28,7 +28,7 @@ int main(int argc, char **argv){
 void Algoritmo (int argc, char **argv){
     struct Phase xv;
     struct K k1, k2, k3, k4;
-	double omega2, omegaext, gamma, f0, tmax, dt, dat[5], x0i, v0i, x0j, v0j, x0jj, v0jj;
+	double omega2, omegaext, gamma, f0, tmax, dt, dat[4], temp[4], x0i, v0i, x0j, v0j, x0jj, v0jj;
 	iterator k, i, j, ii, jj;
 	int n;
 	FILE *fp;
@@ -50,11 +50,12 @@ void Algoritmo (int argc, char **argv){
 	tmax = atof(argv[7]);//deve essere 100, sarebbe il tempo caratteristico
 	dt = atof(argv[8]);
 	n = tmax/dt;
-	for(k=0; k<5; k++){ //Eseguo cinque cicli perche' aumento la forzante
+	for(k=0; k<4; k++){ //Eseguo quattro cicli perche' aumento la forzante, non includo f0=0.9 perchè
+	//i bacini di attrazione vengono tutti neri, infatti non sono presenti nel file
 		char NomeFile[75];
 		char NomeFileColore[75];
-		sprintf(NomeFile, "/workspaces/Computazionale/Lab4/File/Bacini/BaciniF0%.3lfRosso.dat", f0); //Salvo i dati delle varie forzanti in file diversi
-		sprintf(NomeFileColore, "/workspaces/Computazionale/Lab4/File/Bacini/BaciniF0%.3lfNero.dat", f0); //Salvo i dati delle varie forzanti in file diversi
+		sprintf(NomeFile, "/workspaces/Computazionale/Lab4/File/Bacini/BaciniF0%.3lfBlack.dat", f0); //Salvo i dati delle varie forzanti in file diversi
+		sprintf(NomeFileColore, "/workspaces/Computazionale/Lab4/File/Bacini/BaciniF0%.3lfYellow.dat", f0); //Salvo i dati delle varie forzanti in file diversi
 		fp = fopen(NomeFile, "w+");
 		colore = fopen(NomeFileColore, "w+");
 		//Passi algoritmo, tre cicli for per tutte le combinazioni di theta e dtheta/dt (il terzo per arrivare ogni volta a t=100)
@@ -69,14 +70,15 @@ void Algoritmo (int argc, char **argv){
 				}
 				//Alla fine dei 100 secondi, stampo, aggiorno la velocita e ricomincio l'algoritmo per 100 secondi di una velocità aumentata di PI/500
 				if(xv.v<0){
-					fprintf(fp, "%.4lf\t%.4lf\t%.4lf\t%.4lf\n", x0jj, v0jj, xv.x, xv.v);
+					fprintf(fp, "%.4lf\t%.4lf\n", x0jj, v0jj);
 				}
 				if(xv.v>=0){
-					fprintf(colore, "%.4lf\t%.4lf\t%.4lf\t%.4lf\n", x0jj, v0jj, xv.x, xv.v);
+					fprintf(colore, "%.4lf\t%.4lf\n", x0jj, v0jj);
 				}
 				xv.x = x0jj;
 				xv.v = v0jj;
-				xv.v += M_PI/250.;
+				xv.v += M_PI/250.; //andrebbe aumentato di pi/500 ma passiamo da un tempo di computazione di 10 minuti
+				//a 30 circa (per forzante), un grafico con 100.000 punti e risoluzione dimezzata è più che abbastanza
 				if(xv.v > M_PI){
 					break;
 				}
@@ -94,21 +96,22 @@ void Algoritmo (int argc, char **argv){
 		//codice il più generico possibile (motivo per cui ho lasciato il ciclo principale)
 		if(k==0){
 			dat[k] = f0;
-			f0=1.07;
+			temp[k] = tmax;
+			f0=1.15;
 		}
 		if(k==1){
 			dat[k] = f0;
-			f0=1.15;
+			temp[k] = tmax;
+			tmax=93;
+			f0=1.47;
 		}
 		if(k==2){
 			dat[k] = f0;
-			f0=1.47;
-		}
-		if(k==3){
-			dat[k] = f0;
+			temp[k] = tmax;
 			f0=1.50;
 		}
-		if(k==4){
+		if(k==3){
+			temp[k] = tmax;
 			dat[k] = f0;
 		}
 		//xv.x = atof(argv[1]);
@@ -117,7 +120,7 @@ void Algoritmo (int argc, char **argv){
 		xv.v=-M_PI;
 	}
 	fclose(fp);
-	Python(dat);
+	Python(dat, temp);
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -146,7 +149,7 @@ struct K Force(struct K k, double x0, double v0, double dt, double omega2, doubl
 //Implementation of Python file based on the data received on the input line
 //Queste righe non sono strettamente necessarie, ma di nuovo per rendere il codice il più generale possibile si basano sul fatto di riscrivere
 //il python aggiornando i file da cui prendere i dati, i label e i titoli in base ai dati che venogno inseriti come input del file C
-void Python(double dat[5]){
+void Python(double dat[4], double temp[4]){
 	FILE *py;
 	char label[10];
 	char nomefile[10];
@@ -158,36 +161,34 @@ void Python(double dat[5]){
 	fprintf(py, "import matplotlib.pyplot as plt\n");
 	fprintf(py, "from matplotlib.ticker import FormatStrFormatter, FuncFormatter, MultipleLocator\n");
 	fprintf(py, "import numpy as np \n \n");
-	fprintf(py, "#plt.rcParams['axes.grid'] = True\n");
 	fprintf(py, "#plt.figure(figsize=(25, 50), dpi=80)\n");
-	fprintf(py, "fig, axs = plt.subplots(3,2)\n");
-	fprintf(py, "fig.set_figwidth(15)\n");
-	fprintf(py, "fig.set_figheight(15)\n");
+	fprintf(py, "fig, axs = plt.subplots(2,2)\n");
+	fprintf(py, "fig.set_figwidth(10)\n");
+	fprintf(py, "fig.set_figheight(10)\n");
 	fprintf(py, "fig.suptitle('Bacini di attrazione per varie $%s$', fontsize=25)\n \n", label);
 	fprintf(py, "# Data per x(t) e v(t), bacini\n");
-	fprintf(py, "x1, v1 = np.loadtxt('/workspaces/Computazionale/Lab4/File/Bacini%s%.3lf.dat', usecols=(0, 1), unpack=True)\n", nomefile, dat[0]);
-	fprintf(py, "x2, v2 = np.loadtxt('/workspaces/Computazionale/Lab4/File/Bacini%s%.3lf.dat', usecols=(0, 1), unpack=True)\n", nomefile, dat[1]);
-	fprintf(py, "x3, v3 = np.loadtxt('/workspaces/Computazionale/Lab4/File/Bacini%s%.3lf.dat', usecols=(0, 1), unpack=True)\n", nomefile, dat[2]);
-	fprintf(py, "x4, v4 = np.loadtxt('/workspaces/Computazionale/Lab4/File/Bacini%s%.3lf.dat', usecols=(0, 1), unpack=True)\n", nomefile, dat[3]);
-	fprintf(py, "x5, v5 = np.loadtxt('/workspaces/Computazionale/Lab4/File/Bacini%s%.3lf.dat', usecols=(0, 1), unpack=True)\n", nomefile, dat[4]);
-	fprintf(py, "axs[0,0].scatter(x1, v1, color='blue', marker='.', s=0.001)\n");
-	fprintf(py, "axs[0,0].legend(loc='upper left', fontsize=8)\n");
-	fprintf(py, "axs[0,0].title.set_text('$F0=%.2lf$')\n", dat[0]);
-	fprintf(py, "axs[0,1].scatter(x2, v2, color='blue', marker='.',  s=0.001)\n");
-	fprintf(py, "axs[0,1].legend(loc='upper left', fontsize=8)\n");
-	fprintf(py, "axs[0,1].title.set_text('$F0=%.2lf$')\n", dat[1]);
-	fprintf(py, "axs[1,0].scatter(x3, v3, color='blue', marker='.',  s=0.001)\n");
-	fprintf(py, "axs[1,0].legend(loc='upper left', fontsize=8)\n");
-	fprintf(py, "axs[1,0].title.set_text('$F0=%.2lf$')\n", dat[2]);
-	fprintf(py, "axs[1,1].scatter(x4, v4, color='blue', marker='.',  s=0.001)\n");
-	fprintf(py, "axs[1,1].legend(loc='upper left', fontsize=8)\n");
-	fprintf(py, "axs[1,1].title.set_text('$F0=%.2lf$')\n", dat[3]);
-	fprintf(py, "axs[2,0].scatter(x5, v5, color='blue', marker='.',  s=0.001)\n");
-	fprintf(py, "axs[2,0].legend(loc='upper left', fontsize=8)\n");
-	fprintf(py, "axs[2,0].title.set_text('$F0=%.2lf$')\n", dat[4]);
-	fprintf(py, "axs[2,1].set_visible(False)\n");
+	fprintf(py, "x1black, v1black = np.loadtxt('/workspaces/Computazionale/Lab4/File/Bacini/Bacini%s%.3lfBlack.dat', usecols=(0, 1), unpack=True)\n", nomefile, dat[0]);
+	fprintf(py, "x1yellow, v1yellow = np.loadtxt('/workspaces/Computazionale/Lab4/File/Bacini/Bacini%s%.3lfYellow.dat', usecols=(0, 1), unpack=True)\n", nomefile, dat[0]);
+	fprintf(py, "x2black, v2black = np.loadtxt('/workspaces/Computazionale/Lab4/File/Bacini/Bacini%s%.3lfBlack.dat', usecols=(0, 1), unpack=True)\n", nomefile, dat[1]);
+	fprintf(py, "x2yellow, v2yellow = np.loadtxt('/workspaces/Computazionale/Lab4/File/Bacini/Bacini%s%.3lfYellow.dat', usecols=(0, 1), unpack=True)\n", nomefile, dat[1]);
+	fprintf(py, "x3black, v3black = np.loadtxt('/workspaces/Computazionale/Lab4/File/Bacini/Bacini%s%.3lfBlack.dat', usecols=(0, 1), unpack=True)\n", nomefile, dat[2]);
+	fprintf(py, "x3yellow, v3yellow = np.loadtxt('/workspaces/Computazionale/Lab4/File/Bacini/Bacini%s%.3lfYellow.dat', usecols=(0, 1), unpack=True)\n", nomefile, dat[2]);
+	fprintf(py, "x4black, v4black = np.loadtxt('/workspaces/Computazionale/Lab4/File/Bacini/Bacini%s%.3lfBlack.dat', usecols=(0, 1), unpack=True)\n", nomefile, dat[3]);
+	fprintf(py, "x4yellow, v4yellow = np.loadtxt('/workspaces/Computazionale/Lab4/File/Bacini/Bacini%s%.3lfYellow.dat', usecols=(0, 1), unpack=True)\n", nomefile, dat[3]);
+	fprintf(py, "axs[0,0].scatter(x1black, v1black, color='black', marker='.', s=1)\n");
+	fprintf(py, "axs[0,0].scatter(x1yellow, v1yellow, color='yellow', marker='.', s=1)\n");
+	fprintf(py, "axs[0,0].title.set_text('$F0=%.2lf, t^*=%.2lf$')\n", dat[0], temp[0]);
+	fprintf(py, "axs[0,1].scatter(x2black, v2black, color='black', marker='.', s=1)\n");
+	fprintf(py, "axs[0,1].scatter(x2yellow, v2yellow, color='yellow', marker='.', s=1)\n");
+	fprintf(py, "axs[0,1].title.set_text('$F0=%.2lf, t^*=%.2lf$')\n", dat[1], temp[1]);
+	fprintf(py, "axs[1,0].scatter(x3black, v3black, color='black', marker='.', s=1)\n");
+	fprintf(py, "axs[1,0].scatter(x3yellow, v3yellow, color='yellow', marker='.', s=1)\n");
+	fprintf(py, "axs[1,0].title.set_text('$F0=%.2lf, t^*=%.2lf$')\n", dat[2], temp[2]);
+	fprintf(py, "axs[1,1].scatter(x4black, v4black, color='black', marker='.', s=1)\n");
+	fprintf(py, "axs[1,1].scatter(x4yellow, v4yellow, color='yellow', marker='.', s=1)\n");
+	fprintf(py, "axs[1,1].title.set_text('$F0=%.2lf, t^*=%.2lf$')\n", dat[3], temp[3]);
 	fprintf(py, "for ax in axs.flat:\n");
-	fprintf(py, "\tax.set(xlabel='$\\\\theta(0)$', ylabel='$d\\\\theta/dt(0)$')\n");
+	fprintf(py, "\tax.set(xlabel='$\\\\theta(0)$', ylabel='$d\\\\dot \\\\theta(0)$')\n");
 	fprintf(py, "\tax.xaxis.set_major_formatter(FuncFormatter(\n");
 	fprintf(py, "\t\tlambda val,pos: '{:.0g}$\\pi$'.format(val/np.pi) if val !=0 else '0'\n");
 	fprintf(py, "\t))\n");
@@ -196,8 +197,8 @@ void Python(double dat[5]){
 	fprintf(py, "\t\tlambda val,pos: '{:.0g}$\\pi$'.format(val/np.pi) if val !=0 else '0'\n");
 	fprintf(py, "\t))\n");
 	fprintf(py, "\tax.yaxis.set_major_locator(MultipleLocator(base=np.pi/2))\n");
-	fprintf(py, "\tax.grid()\n");
-	fprintf(py, "\tax.set_axisbelow(True)\n");
+	fprintf(py, "\taxs.xlim=(-np.pi, np.pi)\n");
+	fprintf(py, "\taxs.ylim=(-np.pi, np.pi)\n");
 	fprintf(py, "fig.subplots_adjust(left=0.1, bottom=0.1, right=0.9, top=0.9, wspace=0.4, hspace=0.4)\n");
 	fprintf(py, "plt.savefig('/workspaces/Computazionale/Lab4/Grafici/Bacini.pdf')\n");
 	fclose(py);
