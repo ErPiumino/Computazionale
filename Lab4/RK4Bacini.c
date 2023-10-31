@@ -30,8 +30,9 @@ void Algoritmo (int argc, char **argv){
     struct K k1, k2, k3, k4;
 	double omega2, omegaext, gamma, f0, tmax, dt, dat[5], x0i, v0i, x0j, v0j, x0jj, v0jj;
 	iterator k, i, j, ii, jj;
-	int n, vsegno;
+	int n;
 	FILE *fp;
+	FILE *colore;
 	if(argc !=9){
 		printf("\nInput must be: theta0(deg) dtheta0/dt(rad/s) omega2(rad/s^2) gamma omegaext f0 tmax dt\n");
 		exit(1);
@@ -51,8 +52,11 @@ void Algoritmo (int argc, char **argv){
 	n = tmax/dt;
 	for(k=0; k<5; k++){ //Eseguo cinque cicli perche' aumento la forzante
 		char NomeFile[75];
-		sprintf(NomeFile, "/workspaces/Computazionale/Lab4/File/BaciniF0%.3lf.dat", f0); //Salvo i dati delle varie forzanti in file diversi
+		char NomeFileColore[75];
+		sprintf(NomeFile, "/workspaces/Computazionale/Lab4/File/Bacini/BaciniF0%.3lfRosso.dat", f0); //Salvo i dati delle varie forzanti in file diversi
+		sprintf(NomeFileColore, "/workspaces/Computazionale/Lab4/File/Bacini/BaciniF0%.3lfNero.dat", f0); //Salvo i dati delle varie forzanti in file diversi
 		fp = fopen(NomeFile, "w+");
+		colore = fopen(NomeFileColore, "w+");
 		//Passi algoritmo, tre cicli for per tutte le combinazioni di theta e dtheta/dt (il terzo per arrivare ogni volta a t=100)
 		while(xv.x<M_PI){
 			x0j = xv.x;
@@ -65,23 +69,23 @@ void Algoritmo (int argc, char **argv){
 				}
 				//Alla fine dei 100 secondi, stampo, aggiorno la velocita e ricomincio l'algoritmo per 100 secondi di una velocità aumentata di PI/500
 				if(xv.v<0){
-					vsegno = 0;
+					fprintf(fp, "%.4lf\t%.4lf\t%.4lf\t%.4lf\n", x0jj, v0jj, xv.x, xv.v);
 				}
 				if(xv.v>=0){
-					vsegno = 1;
+					fprintf(colore, "%.4lf\t%.4lf\t%.4lf\t%.4lf\n", x0jj, v0jj, xv.x, xv.v);
 				}
-				fprintf(fp, "%.4lf %.4lf %i\n", x0jj, v0jj, vsegno);
 				xv.x = x0jj;
 				xv.v = v0jj;
-				xv.v += M_PI/100.;
+				xv.v += M_PI/250.;
 				if(xv.v > M_PI){
 					break;
 				}
+				jj=1;
 			}
 			//Dopo che per 10.000 volte ho aggionrato la velocità, riporto i valori che avevo salvato all'inizio del ciclo i=1 e aumento la posizione, e faccio ricominciare tutto
 			xv.x = x0j;
 			xv.v = v0j;
-			xv.x += M_PI/100.;
+			xv.x += M_PI/250.;
 			if(xv.x > M_PI){
 				break;
 			}
