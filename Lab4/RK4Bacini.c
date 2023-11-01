@@ -49,9 +49,9 @@ void Algoritmo (int argc, char **argv){
 	f0 = atof(argv[6]);
 	tmax = atof(argv[7]);//deve essere 100, sarebbe il tempo caratteristico
 	dt = atof(argv[8]);
-	n = tmax/dt;
 	for(k=0; k<4; k++){ //Eseguo quattro cicli perche' aumento la forzante, non includo f0=0.9 perchè
 	//i bacini di attrazione vengono tutti neri, infatti non sono presenti nel file
+		n = tmax/dt;
 		char NomeFile[75];
 		char NomeFileColore[75];
 		sprintf(NomeFile, "/workspaces/Computazionale/Lab4/File/Bacini/BaciniF0%.3lfBlack.dat", f0); //Salvo i dati delle varie forzanti in file diversi
@@ -77,7 +77,7 @@ void Algoritmo (int argc, char **argv){
 				}
 				xv.x = x0jj;
 				xv.v = v0jj;
-				xv.v += M_PI/250.; //andrebbe aumentato di pi/500 ma passiamo da un tempo di computazione di 10 minuti
+				xv.v += M_PI/500.; //andrebbe aumentato di pi/500 ma passiamo da un tempo di computazione di 10 minuti
 				//a 30 circa (per forzante), un grafico con 100.000 punti e risoluzione dimezzata è più che abbastanza
 				if(xv.v > M_PI){
 					break;
@@ -87,7 +87,7 @@ void Algoritmo (int argc, char **argv){
 			//Dopo che per 10.000 volte ho aggionrato la velocità, riporto i valori che avevo salvato all'inizio del ciclo i=1 e aumento la posizione, e faccio ricominciare tutto
 			xv.x = x0j;
 			xv.v = v0j;
-			xv.x += M_PI/250.;
+			xv.x += M_PI/500.;
 			if(xv.x > M_PI){
 				break;
 			}
@@ -102,12 +102,13 @@ void Algoritmo (int argc, char **argv){
 		if(k==1){
 			dat[k] = f0;
 			temp[k] = tmax;
-			tmax=93;
+			tmax=93.;
 			f0=1.47;
 		}
 		if(k==2){
 			dat[k] = f0;
 			temp[k] = tmax;
+			tmax=93.;
 			f0=1.50;
 		}
 		if(k==3){
@@ -163,9 +164,9 @@ void Python(double dat[4], double temp[4]){
 	fprintf(py, "import numpy as np \n \n");
 	fprintf(py, "#plt.figure(figsize=(25, 50), dpi=80)\n");
 	fprintf(py, "fig, axs = plt.subplots(2,2)\n");
-	fprintf(py, "fig.set_figwidth(10)\n");
-	fprintf(py, "fig.set_figheight(10)\n");
-	fprintf(py, "fig.suptitle('Bacini di attrazione per varie $%s$', fontsize=25)\n \n", label);
+	fprintf(py, "fig.set_figwidth(30)\n");
+	fprintf(py, "fig.set_figheight(30)\n");
+	fprintf(py, "fig.suptitle('Bacini di attrazione per varie $%s$', fontsize=35)\n \n", label);
 	fprintf(py, "# Data per x(t) e v(t), bacini\n");
 	fprintf(py, "x1black, v1black = np.loadtxt('/workspaces/Computazionale/Lab4/File/Bacini/Bacini%s%.3lfBlack.dat', usecols=(0, 1), unpack=True)\n", nomefile, dat[0]);
 	fprintf(py, "x1yellow, v1yellow = np.loadtxt('/workspaces/Computazionale/Lab4/File/Bacini/Bacini%s%.3lfYellow.dat', usecols=(0, 1), unpack=True)\n", nomefile, dat[0]);
@@ -175,20 +176,22 @@ void Python(double dat[4], double temp[4]){
 	fprintf(py, "x3yellow, v3yellow = np.loadtxt('/workspaces/Computazionale/Lab4/File/Bacini/Bacini%s%.3lfYellow.dat', usecols=(0, 1), unpack=True)\n", nomefile, dat[2]);
 	fprintf(py, "x4black, v4black = np.loadtxt('/workspaces/Computazionale/Lab4/File/Bacini/Bacini%s%.3lfBlack.dat', usecols=(0, 1), unpack=True)\n", nomefile, dat[3]);
 	fprintf(py, "x4yellow, v4yellow = np.loadtxt('/workspaces/Computazionale/Lab4/File/Bacini/Bacini%s%.3lfYellow.dat', usecols=(0, 1), unpack=True)\n", nomefile, dat[3]);
-	fprintf(py, "axs[0,0].scatter(x1black, v1black, color='black', marker='.', s=1)\n");
-	fprintf(py, "axs[0,0].scatter(x1yellow, v1yellow, color='yellow', marker='.', s=1)\n");
-	fprintf(py, "axs[0,0].title.set_text('$F0=%.2lf, t^*=%.2lf$')\n", dat[0], temp[0]);
-	fprintf(py, "axs[0,1].scatter(x2black, v2black, color='black', marker='.', s=1)\n");
-	fprintf(py, "axs[0,1].scatter(x2yellow, v2yellow, color='yellow', marker='.', s=1)\n");
-	fprintf(py, "axs[0,1].title.set_text('$F0=%.2lf, t^*=%.2lf$')\n", dat[1], temp[1]);
-	fprintf(py, "axs[1,0].scatter(x3black, v3black, color='black', marker='.', s=1)\n");
-	fprintf(py, "axs[1,0].scatter(x3yellow, v3yellow, color='yellow', marker='.', s=1)\n");
-	fprintf(py, "axs[1,0].title.set_text('$F0=%.2lf, t^*=%.2lf$')\n", dat[2], temp[2]);
-	fprintf(py, "axs[1,1].scatter(x4black, v4black, color='black', marker='.', s=1)\n");
-	fprintf(py, "axs[1,1].scatter(x4yellow, v4yellow, color='yellow', marker='.', s=1)\n");
-	fprintf(py, "axs[1,1].title.set_text('$F0=%.2lf, t^*=%.2lf$')\n", dat[3], temp[3]);
+	fprintf(py, "axs[0,0].scatter(x1black, v1black, color='black', marker='.', s=2.5)\n");
+	fprintf(py, "axs[0,0].scatter(x1yellow, v1yellow, color='yellow', marker='.', s=2.5)\n");
+	fprintf(py, "axs[0,0].set_title('$F0=%.2lf, t^*=%.2lf$', fontsize=25)\n", dat[0], temp[0]);
+	fprintf(py, "axs[0,1].scatter(x2black, v2black, color='black', marker='.', s=2.5)\n");
+	fprintf(py, "axs[0,1].scatter(x2yellow, v2yellow, color='yellow', marker='.', s=2.5)\n");
+	fprintf(py, "axs[0,1].set_title('$F0=%.2lf, t^*=%.2lf$', fontsize=25)\n", dat[1], temp[1]);
+	fprintf(py, "axs[1,0].scatter(x3black, v3black, color='black', marker='.', s=2.5)\n");
+	fprintf(py, "axs[1,0].scatter(x3yellow, v3yellow, color='yellow', marker='.', s=2.5)\n");
+	fprintf(py, "axs[1,0].set_title('$F0=%.2lf, t^*=%.2lf$', fontsize=25)\n", dat[2], temp[2]);
+	fprintf(py, "axs[1,1].scatter(x4black, v4black, color='black', marker='.', s=2.5)\n");
+	fprintf(py, "axs[1,1].scatter(x4yellow, v4yellow, color='yellow', marker='.', s=2.5)\n");
+	fprintf(py, "axs[1,1].set_title('$F0=%.2lf, t^*=%.2lf$', fontsize=25)\n", dat[3], temp[3]);
 	fprintf(py, "for ax in axs.flat:\n");
 	fprintf(py, "\tax.set(xlabel='$\\\\theta(0)$', ylabel='$d\\\\dot \\\\theta(0)$')\n");
+	fprintf(py, "\tax.xaxis.get_label().set_fontsize(25)\n");
+	fprintf(py, "\tax.yaxis.get_label().set_fontsize(25)\n");
 	fprintf(py, "\tax.xaxis.set_major_formatter(FuncFormatter(\n");
 	fprintf(py, "\t\tlambda val,pos: '{:.0g}$\\pi$'.format(val/np.pi) if val !=0 else '0'\n");
 	fprintf(py, "\t))\n");
@@ -197,9 +200,10 @@ void Python(double dat[4], double temp[4]){
 	fprintf(py, "\t\tlambda val,pos: '{:.0g}$\\pi$'.format(val/np.pi) if val !=0 else '0'\n");
 	fprintf(py, "\t))\n");
 	fprintf(py, "\tax.yaxis.set_major_locator(MultipleLocator(base=np.pi/2))\n");
-	fprintf(py, "\taxs.xlim=(-np.pi, np.pi)\n");
-	fprintf(py, "\taxs.ylim=(-np.pi, np.pi)\n");
+	fprintf(py, "\tax.xlim=(-np.pi, np.pi)\n");
+	fprintf(py, "\tax.ylim=(-np.pi, np.pi)\n");
+	fprintf(py, "\tax.tick_params(axis='both', which='major', labelsize=25)\n");
 	fprintf(py, "fig.subplots_adjust(left=0.1, bottom=0.1, right=0.9, top=0.9, wspace=0.4, hspace=0.4)\n");
-	fprintf(py, "plt.savefig('/workspaces/Computazionale/Lab4/Grafici/Bacini.pdf')\n");
+	fprintf(py, "plt.savefig('/workspaces/Computazionale/Lab4/Grafici/Bacini.png')\n");
 	fclose(py);
 }
