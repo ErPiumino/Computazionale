@@ -28,8 +28,8 @@ int main(int argc, char **argv){
 void Algoritmo (int argc, char **argv){
     struct Phase xv;
     struct K k1, k2, k3, k4;
-	double omega2, omegaext, gamma, f0, tmax, dt, dat[4], temp[4], x0i, v0i, x0j, v0j, x0jj, v0jj;
-	iterator k, i, j, ii, jj;
+	double omega2, omegaext, gamma, f0, tmax, dt, dat[4], temp[4], x0j, v0j, x0jj, v0jj;
+	iterator k, jj;
 	int n;
 	FILE *fp;
 	FILE *colore;

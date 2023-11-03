@@ -27,7 +27,7 @@ int main(int argc, char **argv){
 void Algoritmo (int argc, char **argv){
     struct Phase xv;
     struct K k1, k2, k3, k4;
-	double omega2, omegaext, gamma, f0, dt, dat[10], T, Tmax;
+	double omega2, omegaext, gamma, f0, dt, T, Tmax;
 	iterator k, i;
 	int n;
 	FILE *fp;
@@ -46,7 +46,7 @@ void Algoritmo (int argc, char **argv){
 	f0 = atof(argv[5]);
 	T = (2.*M_PI)/omegaext;
 	dt = T/100.;
-	Tmax = T * 30000.;
+	Tmax = T * 450.;
 	n = Tmax/dt;
 	for(k=0; k<11; k++){ //Eseguo dieci cicli per l'accelerazione
 		double xcontrollo;
@@ -56,12 +56,13 @@ void Algoritmo (int argc, char **argv){
 		char NomeFile[100];
 		sprintf(NomeFile, "/workspaces/Computazionale/Lab4/File/Biforcazione/BiforcazioneK%i.dat", k); //Salvo i dati delle varie forzanti in file diversi
 		fp = fopen(NomeFile, "w+");
-		//Passi algoritmo, tre cicli for per tutte le combinazioni di theta e dtheta/dt (il terzo per arrivare ogni volta a t=100)
 		while(f0<=1.51){
+			xv.x=M_PI/2.;
+			xv.v = (k*M_PI)/10;
 			for(i=1; i<n; i++){
 				Passo(&xv, k1, k2, k3, k4, omega2, omegaext, f0, gamma, dt, Tmax, i);
 				if((double)i*dt >= 5.*T && i<=n && (i%100) == 0){
-					if(fabs(xcontrollo-xv.v)>0.0001){
+					if(fabs(xcontrollo-xv.v)>0.001){
 						fprintf(fp, "%lf\t%lf\n", f0, xv.v);
 						xcontrollo=xv.v;
 					}
@@ -72,7 +73,6 @@ void Algoritmo (int argc, char **argv){
 				break;
 			}
 		}
-		dat[k]=k;
 	}
 	fclose(fp);
 }
