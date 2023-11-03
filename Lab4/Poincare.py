@@ -3,7 +3,6 @@ import matplotlib.pyplot as plt
 import numpy as np 
  
 plt.title('Sezione di Poincarre per varie F0')
-plt.grid()
 plt.xlabel('$\\theta$')
 plt.ylabel('$d\\theta/dt$')
 xp1, vp1 = np.loadtxt('/workspaces/Computazionale/Lab4/File/PuntiPoincarreF00.900.dat', usecols=(0, 1), unpack=True)
