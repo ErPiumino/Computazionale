@@ -54,8 +54,8 @@ void Algoritmo (int argc, char **argv){
     v.x = v0 * cos(theta);
     v.y = v0 * sin(theta);
 	n = tmax/dt;
-	fp1 = fopen("ParteExtra>1.dat", "w+");
-	fp2 = fopen("ParteExtra<1.dat", "w+");
+	fp1 = fopen("ParteExtrax>0.dat", "w+");
+	fp2 = fopen("ParteExtrax<0.dat", "w+");
 	while(theta < M_PI/4. + 0.01){
 		v0 = atof(argv[4]);
 		v.x = v0 * cos(theta);
@@ -64,13 +64,13 @@ void Algoritmo (int argc, char **argv){
 			for(i=1; i<=n; i++){
 				RK2(kx1, kx2, ky1, ky2, &r, &v, gamma, dt, tmax, i);
 			}
-			if(r.x>1){
+			if(r.x>0){
 				fprintf(fp1, "%.5lf \t %.5lf\n", v0, theta);
 			}
-			if(r.x<1){
+			if(r.x<0){
 				fprintf(fp2, "%.5lf \t %.5lf\n", v0, theta);
 			}
-			v0 += 0.01;
+			v0 += 0.001;
 			r.x = atof(argv[1]);
 			r.y = atof(argv[2]);
 			v.x = v0 * cos(theta);
