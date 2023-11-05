@@ -54,8 +54,8 @@ void Algoritmo (int argc, char **argv){
     v.x = v0 * cos(theta);
     v.y = v0 * sin(theta);
 	n = tmax/dt;
-	fp1 = fopen("ParteExtrax>0.dat", "w+");
-	fp2 = fopen("ParteExtrax<0.dat", "w+");
+	fp1 = fopen("ParteExtray>0.dat", "w+");
+	fp2 = fopen("ParteExtray<0.dat", "w+");
 	while(theta < M_PI/4. + 0.01){
 		v0 = atof(argv[4]);
 		v.x = v0 * cos(theta);
@@ -64,13 +64,13 @@ void Algoritmo (int argc, char **argv){
 			for(i=1; i<=n; i++){
 				RK2(kx1, kx2, ky1, ky2, &r, &v, gamma, dt, tmax, i);
 			}
-			if(r.x>0){
+			if(r.y>0){
 				fprintf(fp1, "%.5lf \t %.5lf\n", v0, theta);
 			}
-			if(r.x<0){
+			if(r.y<0){
 				fprintf(fp2, "%.5lf \t %.5lf\n", v0, theta);
 			}
-			v0 += 0.001;
+			v0 += 0.01;
 			r.x = atof(argv[1]);
 			r.y = atof(argv[2]);
 			v.x = v0 * cos(theta);
@@ -103,8 +103,8 @@ void RK2(struct K kx1, struct K kx2, struct K ky1, struct K ky2, struct Position
 	ky2 = Forcey(kx2, r->x+kx1.k1/2., v->y + kx1.k2/2., r->y+kx1.k1/2., dt, gamma, (double)(i-1)*dt+dt/2.);
 
 	r->x = x0 + kx2.k1;
-	v->x = vx0 + kx2.k2;
 	r->y = y0 + ky2.k1;
+	v->x = vx0 + kx2.k2;
 	v->y = vy0 + ky2.k2;
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -81,12 +81,12 @@ void RK2(struct K kx1, struct K kx2, struct K ky1, struct K ky2, struct Position
 	vy0 = v->y;
 	kx1 = Forcex(kx1, r->x, v->x, r->y, dt, gamma, (double)(i-1)*dt);
 	kx2 = Forcex(kx2, r->x+kx1.k1/2., v->x + kx1.k2/2., r->y+kx1.k1/2., dt, gamma, (double)(i-1)*dt+dt/2.);
-	ky1 = Forcey(kx1, r->x, v->y, r->y, dt, gamma, (double)(i-1)*dt);
-	ky2 = Forcey(kx2, r->x+kx1.k1/2., v->y + kx1.k2/2., r->y+kx1.k1/2., dt, gamma, (double)(i-1)*dt+dt/2.);
+	ky1 = Forcey(ky1, r->x, v->y, r->y, dt, gamma, (double)(i-1)*dt);
+	ky2 = Forcey(ky2, r->x+ky1.k1/2., v->y + ky1.k2/2., r->y+ky1.k1/2., dt, gamma, (double)(i-1)*dt+dt/2.);
 
 	r->x = x0 + kx2.k1;
-	v->x = vx0 + kx2.k2;
 	r->y = y0 + ky2.k1;
+	v->x = vx0 + kx2.k2;
 	v->y = vy0 + ky2.k2;
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
