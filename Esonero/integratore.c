@@ -44,11 +44,11 @@ void Algoritmo (int argc, char **argv){
 	tmax = atof(argv[6]);
 	n = tmax/dt;
 	E0 = Conservation(&r0, &v0);
-	printf("0.0000000000 \t %.10lf \t %.10lf \t %.10lf \n",r0.x, r0.y, E0);
+	printf("0.0000000000 \t %.10lf \t %.10lf\n",r0.x, r0.y);
 	for(i=1; i<=n; i++){
 		Verlet(&r, &r0, &v, &v0, dt, i);
 		E = Conservation(&r, &v);
-		printf("%.10lf \t %.10lf \t %.10lf \t %.10lf\n", (double)i*dt, r.x, r.y, E);
+		printf("%.10lf \t %.10lf \t %.10lf \n", (double)i*dt, r.x, r.y);
 	}
 	r0.x = atof(argv[1]);
 	r0.y = atof(argv[2]);
