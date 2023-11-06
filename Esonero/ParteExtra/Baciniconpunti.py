@@ -5,8 +5,8 @@ from matplotlib.ticker import FormatStrFormatter, FuncFormatter, MultipleLocator
 import numpy as np 
 import matplotlib.patches as mpatches
 
-V0 = [1.81, 1.87, 1.41, 2.28, 1.07, 2.29, 1.20, 1.28]
-theta = [0.24, 0.48, 0.23, 0.05, 0.64, 0.32, 0.59, 0.36]
+V0 = [2.06, 2.23, 2.82, 1.44, 2.69, 1.20, 1.32, 1.97]
+theta = [0.30, 0.75, 0.70, 0.08, 0.07, 0.16, 0.41, 0.01]
 
 fig, ax = plt.subplots(1)
 fig.set_figwidth(30)

@@ -9,7 +9,7 @@ fig.suptitle('Studio di Equazione differenziale con attrito e con dt=0.01', font
 # Data and plot
 t, x, y, e = np.loadtxt('Parte3dt0.01.dat', usecols=(0, 1, 2, 3), unpack=True)
 ax[0,0].plot(x, y, color='darkslategrey', label='(y(t), x(t))')
-ax[0,0].set_title('Spazio delle fasi', fontsize=25)
+ax[0,0].set_title('Traiettoria', fontsize=25)
 ax[0,0].set(xlabel='x(t)', ylabel='y(t)')
 ax[0,1].plot(t, e, color='skyblue', label='e(t)')
 ax[0,1].set_title('Conservazione', fontsize=25)
