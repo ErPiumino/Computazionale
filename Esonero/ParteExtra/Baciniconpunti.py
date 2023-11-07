@@ -4,16 +4,16 @@ import matplotlib.pyplot as plt
 import numpy as np 
 import matplotlib.patches as mpatches
 
-V0 = [1.00, 1.10, 1.21, 1.32, 2.27, 2.38, 2.93, 2.98]
-theta = [0.02, 0.66, 0.61, 0.70, 0.22, 0.03, 0.10, 0.66]
+V0 = [1.07, 1.20, 1.28, 1.41, 1.81, 1.87, 2.28, 2.29]
+theta = [0.64, 0.59, 0.36, 0.23, 0.24, 0.48, 0.05, 0.32]
 
 fig, ax = plt.subplots(1)
 fig.set_figwidth(30)
 fig.set_figheight(30)
 x1, y1=np.loadtxt("ParteExtrax>1.dat",unpack=True)
 x2, y2=np.loadtxt("ParteExtrax<1.dat",unpack=True)
-ax.scatter(x2, y2, color='yellow', label='x(100)<1', s=1)
-ax.scatter(x1, y1, color='black', label='x(100)>1', s=1)
+ax.scatter(x2, y2, color='yellow', label='x(100)<1', s=2)
+ax.scatter(x1, y1, color='black', label='x(100)>1', s=2)
 ax.scatter(V0[0], theta[0], s=500, linewidth=10, facecolors='none', edgecolors='grey')
 plt.text(V0[0]+0.01, theta[0]+0.01, f'({V0[0]:.2f};{theta[0]:.2f})' , fontsize=30, color='grey', weight='bold')
 ax.scatter(V0[1], theta[1], s=500, linewidth=10, facecolors='none', edgecolors='red')

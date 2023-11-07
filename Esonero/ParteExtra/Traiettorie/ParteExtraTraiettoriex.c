@@ -79,6 +79,8 @@ void Algoritmo (int argc, char **argv){
 				break;
 			}
 		}
+		r.x = atof(argv[1]);
+		r.y = atof(argv[2]);
 		v.x = v0 * cos(theta);
     	v.y = v0 * sin(theta);
 		char NomeFile[50];
@@ -91,8 +93,6 @@ void Algoritmo (int argc, char **argv){
 		fclose(fp);
 		v0dat[k] = v0;
 		thetadat[k] = theta;
-		r.x = atof(argv[1]);
-		r.y = atof(argv[2]);
 	}
 	Python(v0dat, thetadat);
 }
