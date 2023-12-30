@@ -84,7 +84,7 @@ void Algoritmo (int argc, char **argv){
 				}
 				jj=1;
 			}
-			//Dopo che per 10.000 volte ho aggionrato la velocità, riporto i valori che avevo salvato all'inizio del ciclo i=1 e aumento la posizione, e faccio ricominciare tutto
+			//Dopo che per 10.000 volte ho aggiornato la velocità, riporto i valori che avevo salvato all'inizio del ciclo i=1 e aumento la posizione, e faccio ricominciare tutto
 			xv.x = x0j;
 			xv.v = v0j;
 			xv.x += M_PI/500.;

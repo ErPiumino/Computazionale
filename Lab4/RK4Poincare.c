@@ -47,7 +47,7 @@ void Algoritmo (int argc, char **argv){
 	}
 	//Lettura variabili e apertura file
 	//xv.x = atof(argv[1]);//atof legge un float, atoi per gli int
-	xv.x=M_PI/2.;//per essere precisi lo inserisco qui e ignoro l'inserimento da input, ma il risultato è identico se si approssima con abbastanza decimali
+	xv.x = M_PI/2.;//per essere precisi lo inserisco qui e ignoro l'inserimento da input, ma il risultato è identico se si approssima con abbastanza decimali
 	xv.v = atof(argv[2]);
 	omega2 = atof(argv[3]);
 	gamma = atof(argv[4]);
@@ -66,9 +66,9 @@ void Algoritmo (int argc, char **argv){
 		n1 = (int)Tmax/dt;
 		char NomeFile[75];
 		char NomeFilePunti[75];
-		sprintf(NomeFile, "/workspaces/Computazionale/Lab4/File/PendoloPoincareF0%.3lf.dat", f0); //Salvo i dati delle varie forzanti in file diversi
+		sprintf(NomeFile, "/workspaces/Computazionale2/Lab4/File/PendoloPoincareF0%.3lf.dat", f0); //Salvo i dati delle varie forzanti in file diversi
   		fp = fopen(NomeFile, "w");
-		sprintf(NomeFilePunti, "/workspaces/Computazionale/Lab4/File/PuntiPoincarreF0%.3lf.dat", f0); //Salvo i dati dei punti per Poincarre delle varie forzanti in file diversi
+		sprintf(NomeFilePunti, "/workspaces/Computazionale2/Lab4/File/PuntiPoincarreF0%.3lf.dat", f0); //Salvo i dati dei punti per Poincarre delle varie forzanti in file diversi
 		punti = fopen(NomeFilePunti, "w+");
 		fprintf(fp, "\t %.4lf \t %.4lf\n", xv.x, xv.v);
 		//Passi algoritmo
@@ -112,7 +112,7 @@ void Algoritmo (int argc, char **argv){
 	}
 	fclose(fp);
 	fclose(punti);
-	Python(dat);
+	//Python(dat);
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

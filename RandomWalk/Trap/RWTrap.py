@@ -1,0 +1,45 @@
+import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib.ticker import MultipleLocator
+fig, ax = plt.subplots(3,2)
+fig.set_figwidth(20)
+fig.set_figheight(20)
+fig.suptitle('1D Random walk with probability p=0.90 for various number of steps', fontsize=20)
+y1, x1 = np.loadtxt('/workspaces/Computazionale2/Lab5/File/RWTrapn=10p=0.90.dat', usecols=(0, 1), unpack=True)
+N1 = len(x1)
+y2, x2 = np.loadtxt('/workspaces/Computazionale2/Lab5/File/RWTrapn=60p=0.90.dat', usecols=(0, 1), unpack=True)
+N2 = len(x2)
+y3, x3 = np.loadtxt('/workspaces/Computazionale2/Lab5/File/RWTrapn=360p=0.90.dat', usecols=(0, 1), unpack=True)
+N3 = len(x3)
+y4, x4 = np.loadtxt('/workspaces/Computazionale2/Lab5/File/RWTrapn=2160p=0.90.dat', usecols=(0, 1), unpack=True)
+N4 = len(x4)
+y5, x5 = np.loadtxt('/workspaces/Computazionale2/Lab5/File/RWTrapn=12960p=0.90.dat', usecols=(0, 1), unpack=True)
+N5 = len(x5)
+y6, x6 = np.loadtxt('/workspaces/Computazionale2/Lab5/File/RWTrapn=77760p=0.90.dat', usecols=(0, 1), unpack=True)
+N6 = len(x6)
+#Vari plot
+ax[0,0].plot(x1, y1, color='skyblue', label=f'Random Walk 10 steps',  zorder=-1)
+ax[0,1].plot(x2, y2, color='skyblue', label=f'Random Walk 60 steps',  zorder=-1)
+ax[1,0].plot(x3, y3, color='skyblue', label=f'Random Walk 360 steps',  zorder=-1)
+ax[1,1].plot(x4, y4, color='skyblue', label=f'Random Walk 2160 steps',  zorder=-1)
+ax[2,0].plot(x5, y5, color='skyblue', label=f'Random Walk 12960 steps',  zorder=-1)
+ax[2,1].plot(x6, y6, color='skyblue', label=f'Random Walk 77760 steps',  zorder=-1)
+#Initial Points plots
+ax[0,0].scatter(x1[0], y1[0], color='red', label=f'Starting Point: ({x1[0]:.0f}, {y1[0]:.0f})',  zorder=1)
+ax[0,1].scatter(x2[0], y2[0], color='red', label=f'Starting Point: ({x2[0]:.0f}, {y2[0]:.0f})',  zorder=1)
+ax[1,0].scatter(x3[0], y3[0], color='red', label=f'Starting Point: ({x3[0]:.0f}, {y3[0]:.0f})',  zorder=1)
+ax[1,1].scatter(x4[0], y4[0], color='red', label=f'Starting Point: ({x4[0]:.0f}, {y4[0]:.0f})',  zorder=1)
+ax[2,0].scatter(x5[0], y5[0], color='red', label=f'Starting Point: ({x5[0]:.0f}, {y5[0]:.0f})',  zorder=1)
+ax[2,1].scatter(x6[0], y6[0], color='red', label=f'Starting Point: ({x6[0]:.0f}, {y6[0]:.0f})',  zorder=1)
+#Final Points plots
+ax[0,0].scatter(x1[-1], y1[-1], color='darkslategrey', label=f'Final Point:  ({x1[-1]:.0f}, {y1[-1]:.0f})', zorder=1)
+ax[0,1].scatter(x2[-1], y2[-1], color='darkslategrey', label=f'Final Point:  ({x2[-1]:.0f}, {y2[-1]:.0f})', zorder=1)
+ax[1,0].scatter(x3[-1], y3[-1], color='darkslategrey', label=f'Final Point:  ({x3[-1]:.0f}, {y3[-1]:.0f})', zorder=1)
+ax[1,1].scatter(x4[-1], y4[-1], color='darkslategrey', label=f'Final Point:  ({x4[-1]:.0f}, {y4[-1]:.0f})', zorder=1)
+ax[2,0].scatter(x5[-1], y5[-1], color='darkslategrey', label=f'Final Point:  ({x5[-1]:.0f}, {y5[-1]:.0f})', zorder=1)
+ax[2,1].scatter(x6[-1], y6[-1], color='darkslategrey', label=f'Final Point:  ({x6[-1]:.0f}, {y6[-1]:.0f})', zorder=1)
+#Empty plots
+for ax in ax.flat:
+    ax.legend(fontsize=10)
+    ax.set(xlabel='t', ylabel='y')
+plt.savefig('RWTrapP=0.90.png')

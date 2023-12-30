@@ -1,5 +1,7 @@
 {
     "files.associations": {
-        "stdlib.h": "c"
+        "stdbool.h": "c",
+        "array": "c",
+        "cmath": "cpp"
     }
 }
