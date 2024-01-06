@@ -197,28 +197,17 @@ void Bacini(int argv, char *argc[], FILE* gnu, double f0){
 void Biforcazione(int argv, char *argc[], FILE* gnu, int k){
     Pos xv;
     K k1, k2, k3, k4;
-    double xcontrollo;
     double omega2 = atof(argc[2]), gamma = atof(argc[3]), omegaext = atof(argc[4]);
-    double f0=0.9;
 	double T = (2.*M_PI)/omegaext;
 	double dt = T/100.;
-	double Tmax = T * 450.;
-	int n = Tmax/dt;
-    while(f0<=1.51){
+	int n = T/dt;
+    int m = n *100;
+    for(double f0=0.9; f0<=1.5; f0+= 0.00001){
         xv.x = atof(argc[1]); 
         xv.v = (k*M_PI)/10;
-        for(int i=1; i<n; i++){
-            Passo(&xv, k1, k2, k3, k4, omega2, omegaext, f0, gamma, dt, Tmax, i);
-            if((double)i*dt >= 5.*T && i<=n && (i%100) == 0){
-                if(fabs(xcontrollo-xv.v)>0.001){
-                    fprintf(gnu, "%lf %lf\n", f0, xv.v);
-                    xcontrollo=xv.v;
-                }
-            }
+        for(int i=0; i<=m; i++){
+            Passo(&xv, k1, k2, k3, k4, omega2, omegaext, f0, gamma, dt, T, i);
         }
-        f0 += 0.0001;
-        if(f0>1.500000){
-            break;
-        }
+        fprintf(gnu, "%lf %lf\n", f0, xv.v);
     }
 }

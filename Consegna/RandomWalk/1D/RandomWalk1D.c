@@ -37,7 +37,6 @@ void RW(int argc, char **argv){
     RP.seed = time(NULL);
     for(k=0; k<6; k++){ //based on n
         i=0;
-        r = atoi(argv[1]); //Initial position
         char NomeFile[60];
         char NomeFile1[60];
         char NomeFile2[60];
@@ -67,7 +66,6 @@ void RW(int argc, char **argv){
                 mean2 = fabs((double)pow(r,2)/n);
                 std = sqrt(mean2 - pow(mean, 2));
                 fprintf(fp1, "%.2lf \t %.2lf\n", mean, std);
-                printf("\nMedia x: \t %.2lf +- %.2lf \t (n=%i)\n", mean, std, n);
             }
         }
         fclose(fp);

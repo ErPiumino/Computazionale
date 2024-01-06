@@ -9,10 +9,11 @@ int main(int argv, char *argc[]){
 
     char *gnuplot_commands[300] = {
         "set terminal png size 1500,1200 enhanced",
-        "set title 'Bifurcation of theta in respect to df0",
+        "set title 'Bifurcation of dtheta/dt in respect to df0",
         "set xlabel 'f0'",
-        "set ylabel 'x'",
+        "set ylabel 'dx/dt'",
         "set grid",
+        "unset key",
         "set output 'Biforcazione.png'",
         "end" 
     };
@@ -30,7 +31,7 @@ int main(int argv, char *argc[]){
     } while (strcmp(c,"end") != 0);
     fprintf(gnu, "plot ");
     for (int i=0; i<11; i++){
-        fprintf(gnu, "'-' pt 7 ps 0.01, ");
+        fprintf(gnu, "'-' pt 7 ps 0.5, ");
     }
     fprintf(gnu, "\n");
     for(int k=0; k<11; k++){
